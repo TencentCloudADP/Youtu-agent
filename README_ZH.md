@@ -297,10 +297,10 @@ python examples/svg_generator/main_web.py
 
 ```bash
 # fetch and download the frontend package
-curl -LO https://github.com/Tencent/Youtu-agent/releases/download/frontend%2Fv0.1.5/utu_agent_ui-0.1.5-py3-none-any.whl
+curl -LO https://github.com/Tencent/Youtu-agent/releases/download/frontend%2Fv0.2.0/utu_agent_ui-0.2.0-py3-none-any.whl
 
 # install frontend package
-uv pip install utu_agent_ui-0.1.5-py3-none-any.whl
+uv pip install utu_agent_ui-0.2.0-py3-none-any.whl
 ```
 
 然后运行web版本的SVG图片生成命令：
