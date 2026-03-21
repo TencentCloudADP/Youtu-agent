@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  youtu-agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        BUILD_MODE: local
+    ports:
+      - "8848:8848"
+    volumes:
+      - "./.env:/youtu-agent/.env"
+    environment:
+      # 从.env文件加载环境变量
+      - UTU_LLM_TYPE=${UTU_LLM_TYPE}
+      - UTU_LLM_MODEL=${UTU_LLM_MODEL}
+      - UTU_LLM_BASE_URL=${UTU_LLM_BASE_URL}
+      - UTU_LLM_API_KEY=${UTU_LLM_API_KEY}
+      - SERPER_API_KEY=${SERPER_API_KEY}
+      - JINA_API_KEY=${JINA_API_KEY}
+      # Phoenix相关配置从.env文件加载，以支持主机名方式访问
+      - PHOENIX_PROJECT_NAME=${PHOENIX_PROJECT_NAME}
+      - DB_URL=${DB_URL}
+      - UTU_LOG_LEVEL=${UTU_LOG_LEVEL}
+      - UTU_WEBUI_PORT=${UTU_WEBUI_PORT}
+      - UTU_WEBUI_IP=${UTU_WEBUI_IP}
+    env_file:
+      - .env
+    networks:
+      - phoenix_default
+    restart: unless-stopped
+
+networks:
+  phoenix_default:
+    external: true

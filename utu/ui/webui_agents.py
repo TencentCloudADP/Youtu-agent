@@ -333,20 +333,32 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         try:
             data = json.loads(message)
             print(data)
-            request = UserRequest(**data)
-            if request.type == "query":
-                # put query into queue, let query worker handle it
-                await self.query_queue.put(request.content)
-            elif request.type == "answer":
-                await self._handle_answer(request.content)
-            elif request.type == "list_agents":
-                await self._handle_list_agents()
-            elif request.type == "switch_agent":
-                await self._handle_switch_agent(request.content)
-            elif request.type == "gen_agent":
-                await self._handle_gen_agent()
+            msg_type = data.get('type')
+            if msg_type == "query":
+                query_str = data.get('query')
+                if query_str and query_str.strip():
+                    query_obj = UserQuery(query=query_str)
+                    await self.query_queue.put(query_obj)
+                else:
+                    await self._handle_error("Query cannot be empty")
+            elif msg_type == "answer":
+                answer = data.get('answer')
+                ask_id = data.get('ask_id')
+                if answer and ask_id:
+                    answer_obj = UserAnswer(answer=answer, ask_id=ask_id)
+                    await self.answer_queue.put(answer_obj)
+                else:
+                    await self._handle_error("Invalid answer data")
             else:
-                logging.error(f"Unhandled message type: {data.get('type')}")
+                request = UserRequest(**data)
+                if request.type == "list_agents":
+                    await self._handle_list_agents()
+                elif request.type == "switch_agent":
+                    await self._handle_switch_agent(request.content)
+                elif request.type == "gen_agent":
+                    await self._handle_gen_agent()
+                else:
+                    logging.error(f"Unhandled message type: {msg_type}")
         except json.JSONDecodeError:
             logging.error(f"Invalid JSON received: {message}")
             await self._handle_error(f"Invalid JSON received: {message}")
