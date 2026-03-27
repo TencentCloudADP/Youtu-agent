@@ -1,0 +1,3121 @@
+manifest:
+  version: "0.1.2"
+  schema: https://a2as.org/cert/schema
+  subject:
+    name: tencentcloudadp/youtu-agent
+    source: https://github.com/tencentcloudadp/youtu-agent
+    branch: main
+    commit: "92db0d71"
+    scope: [scripts/utils/dump_tool_schemas.py, utu/agents/common.py, utu/agents/llm_agent.py, utu/agents/orchestra/planner.py,
+      utu/agents/orchestra/reporter.py, utu/agents/orchestrator/chain.py, utu/agents/simple_agent.py, utu/agents/workforce/answerer.py,
+      utu/agents/workforce/assigner.py, utu/agents/workforce/planner.py, utu/context/__init__.py, utu/env/browser_env.py,
+      utu/env/browser_env_e2b.py, utu/env/browser_tione_env.py, utu/meta/tool_generator_mcp.py, utu/models/react.py, utu/models/react_converter.py,
+      utu/runner/openai_runner.py, utu/runner/react_runner.py, utu/tools/audio_toolkit.py, utu/tools/base.py, utu/tools/document_toolkit.py,
+      utu/tools/image_toolkit.py, utu/tools/search_toolkit.py, utu/tools/tabular_data_toolkit.py, utu/tracing/otel_agents_processor.py,
+      utu/utils/agents_utils.py, utu/utils/mcp_utils.py, utu/utils/openai_utils/openai_utils.py, utu/utils/openai_utils/types.py]
+  issued:
+    by: A2AS.org
+    at: '2026-01-26T16:11:59Z'
+  signatures:
+    digest: sha256:efeb1Xr-LwTY44zBgM-UGXlO4-KGao8IgDUoYigD-G8
+    key: ed25519:FVasu92dq2SMYDllnRfba0lisDXndwRyjcwHg6H5F8A
+    sig: ed25519:OCzSzzSBC7WRVuWK5NYQ00RkuTTBOXgUNXdtT4lpMyUrRH0D2r6jcdrmvKvy64KLkXOsn_PnJev0sPJtiW1CDA
+
+agents:
+  agent.get_tools_agents:
+    type: factory
+    models: [gpt-4.1]
+    params:
+      function: get_tools_agents
+      name: dummy
+  agent.get_tools_mcp:
+    type: factory
+    models: [gpt-4.1]
+    params:
+      function: get_tools_mcp
+      name: dummy
+  agent.SimpleAgent.current_agent:
+    type: class
+    models: [self.model]
+    tools: [tools]
+    params:
+      class: SimpleAgent
+      name: self.config.agent.name
+      model_settings: self.model_settings
+      output_type: self.output_type
+      tool_use_behavior: self.tool_use_behavior
+  llm:
+    type: instance
+    models: [AgentsUtils.get_agents_model]
+    params:
+      class: LLMAgent
+      model_settings: model_config.model_settings
+      output_type: output_type
+      instructions: [instructions]
+
+models:
+  AgentsUtils.get_agents_model:
+    type: function
+    agents: [llm]
+  gpt-4.1:
+    type: default
+    agents: [agent.get_tools_mcp, agent.get_tools_agents]
+  self.model:
+    type: variable
+    agents: [agent.SimpleAgent.current_agent]
+
+tools:
+  tools:
+    type: variable
+    agents: [agent.SimpleAgent.current_agent]
+    params:
+      dynamic: "True"
+
+imports:
+  _BaseEnv: env._BaseEnv
+  _copy_str_or_list: agents.run._copy_str_or_list
+  _coro: agents.util._coro
+  _dc: dataclasses
+  _error_tracing: agents.util._error_tracing
+  _ServerConversationTracker: agents.run._ServerConversationTracker
+  _TOOL_CALL_TYPES: agents.run._TOOL_CALL_TYPES
+  abc: abc
+  add_trace_processor: agents.add_trace_processor
+  ag: agents
+  Agent: agents.Agent
+  agent_span: agents.tracing.agent_span
+  AgentBase: agents.AgentBase
+  AgentConfig: config.AgentConfig
+  AgentInfo: common.AgentInfo
+  AgentOutputSchema: agents.AgentOutputSchema
+  AgentOutputSchemaBase: agents.AgentOutputSchemaBase
+  AgentRunner: agents.run.AgentRunner
+  AgentsException: agents.exceptions.AgentsException
+  AgentsMCPUtils: utils.AgentsMCPUtils
+  AgentSpanData: agents.tracing.span_data.AgentSpanData
+  AgentsUtils: utils.AgentsUtils
+  AgentToolUseTracker: agents._run_impl.AgentToolUseTracker
+  AgentUpdatedStreamEvent: agents.stream_events.AgentUpdatedStreamEvent
+  aiohttp: aiohttp
+  AnalysisResult: common.AnalysisResult
+  annotations: __future__.annotations
+  AnswererAgent: answerer.AnswererAgent
+  Any: typing.Any
+  argparse: argparse
+  arxiv: arxiv
+  ArxivToolkit: arxiv_toolkit.ArxivToolkit
+  asdict: dataclasses.asdict
+  AskContent: common.AskContent
+  AssignerAgent: assigner.AssignerAgent
+  async_file_cache: utils.async_file_cache
+  AsyncBaseToolkit: base.AsyncBaseToolkit
+  asynccontextmanager: contextlib.asynccontextmanager
+  AsyncExitStack: contextlib.AsyncExitStack
+  AsyncGenerator: collections.abc.AsyncGenerator
+  asyncio: asyncio
+  AsyncIterator: collections.abc.AsyncIterator
+  AsyncLimiter: aiolimiter.AsyncLimiter
+  AsyncOpenAI: openai.AsyncOpenAI
+  AsyncSandbox: e2b_code_interpreter.AsyncSandbox
+  AsyncStream: openai._streaming.AsyncStream
+  AsyncWebCrawler: crawl4ai.AsyncWebCrawler
+  attach: opentelemetry.context.attach
+  AttributeValue: opentelemetry.util.types.AttributeValue
+  AudioToolkit: audio_toolkit.AudioToolkit
+  BaiduSearch: search.baidu_search.BaiduSearch
+  base64: base64
+  BaseConfig: traitlets.config.loader.Config
+  BaseContextManager: base_context_manager.BaseContextManager
+  BaseEnv: base_env.BaseEnv
+  BaseInstrumentor: opentelemetry.instrumentation.instrumentor.BaseInstrumentor
+  BaseModel: pydantic.BaseModel
+  BaseRunHooks: base_hooks.BaseRunHooks
+  BashToolkit: bash_toolkit.BashToolkit
+  BeautifulSoup: bs4.BeautifulSoup
+  Body: openai._types.Body
+  BrowserE2BEnv: browser_env_e2b.BrowserE2BEnv
+  BrowserEnv: browser_env.BrowserEnv
+  BrowserTioneEnv: browser_tione_env.BrowserTioneEnv
+  build_context_manager: context.build_context_manager
+  BytesIO: io.BytesIO
+  CACHE_DIR: utils.CACHE_DIR
+  calendar: calendar
+  Callable: collections.abc.Callable
+  CallModelData: agents.run.CallModelData
+  cast: typing.cast
+  ChainPlanner: orchestrator.ChainPlanner
+  ChatCompletion: openai.types.chat.ChatCompletion
+  ChatCompletionChunk: openai.types.chat.ChatCompletionChunk
+  ChatCompletionConverter: utils.ChatCompletionConverter
+  ChatCompletionMessage: openai.types.chat.ChatCompletionMessage
+  ChatCompletionMessageFunctionToolCall: openai.types.chat.ChatCompletionMessageFunctionToolCall
+  ChatCompletionMessageParam: openai.types.chat.ChatCompletionMessageParam
+  ChatCompletionMessageToolCall: openai.types.chat.ChatCompletionMessageToolCall
+  ChatCompletionToolParam: openai.types.chat.ChatCompletionToolParam
+  ChatModel: openai.types.shared.ChatModel
+  Chunkr: chunkr_ai.Chunkr
+  ChunkrParser: documents.chunkr_parser.ChunkrParser
+  ClientProfile: tencentcloud.common.profile.client_profile.ClientProfile
+  ClientSession: mcp.client.session.ClientSession
+  CodesnipToolkit: codesnip_toolkit.CodesnipToolkit
+  Collection: collections.abc.Collection
+  ColoredFormatter: colorlog.ColoredFormatter
+  Column: sqlmodel.Column
+  CommandExitException: e2b.sandbox.commands.command_handle.CommandExitException
+  CommandResult: e2b.sandbox.commands.command_handle.CommandResult
+  CommonClient: tencentcloud.common.common_client.CommonClient
+  compose: hydra.compose
+  Config: traitlets.config.loader.Config
+  ConfigBaseModel: base_config.ConfigBaseModel
+  ConfigDict: pydantic.ConfigDict
+  ConfigLoader: config.ConfigLoader
+  Configuration: chunkr_ai.models.Configuration
+  Content: openai.types.responses.response_output_message_param.Content
+  ContentFilter: utils.ContentFilter
+  contextlib: contextlib
+  Converter: agents.models.chatcmpl_converter.Converter
+  ConverterPreprocessInput: react_converter.ConverterPreprocessInput
+  copy: copy
+  Crawl4aiCrawl: search.crawl4ai_crawl.Crawl4aiCrawl
+  create_engine: sqlmodel.create_engine
+  CreatePlanResult: common.CreatePlanResult
+  credential: tencentcloud.common.credential
+  CustomSpanData: agents.tracing.span_data.CustomSpanData
+  DataArguments: practice_config.DataArguments
+  dataclass: dataclasses.dataclass
+  DataClassWithStreamEvents: agents.common.DataClassWithStreamEvents
+  DatasetSample: eval_datapoint.DatasetSample
+  datetime: datetime
+  DBService: db.DBService
+  DDGS: ddgs.DDGS
+  deepcopy: copy.deepcopy
+  DEFAULT_MAX_TURNS: agents.run.DEFAULT_MAX_TURNS
+  defaultdict: collections.defaultdict
+  detach: opentelemetry.context.detach
+  DIR_ROOT: utils.DIR_ROOT
+  docker: docker
+  DockerManager: docker_manager.DockerManager
+  DocumentToolkit: document_toolkit.DocumentToolkit
+  DuckDuckGoSearch: search.duckduckgo_search.DuckDuckGoSearch
+  DummyContextManager: base_context_manager.DummyContextManager
+  E2BEnv: e2b_env.E2BEnv
+  E2BUtils: utils.E2BUtils
+  EasyInputMessageParam: openai.types.responses.EasyInputMessageParam
+  encode_image: image.encode_image
+  Enum: enum.Enum
+  EnvContextManager: env_context_manager.EnvContextManager
+  Environment: jinja2.Environment
+  EnvUtils: utils.EnvUtils
+  ErrorContent: common.ErrorContent
+  eval_datapoint: utu.db.eval_datapoint
+  EvalConfig: eval_config.EvalConfig
+  EvaluationSample: eval_datapoint.EvaluationSample
+  Event: common.Event
+  ExampleContent: common.ExampleContent
+  execute_python_code_async: local_env.python.execute_python_code_async
+  Execution: e2b_code_interpreter.models.Execution
+  ExecutorAgent: executor.ExecutorAgent
+  ExperienceCacheModel: experience_cache_model.ExperienceCacheModel
+  Field: sqlmodel.Field
+  field: dataclasses.field
+  FileEditLocal: local_env.file_edit.FileEditLocal
+  FileEditToolkit: file_edit_toolkit.FileEditToolkit
+  FileSystemLoader: jinja2.FileSystemLoader
+  FileUtils: utils.FileUtils
+  find_dotenv: dotenv.find_dotenv
+  fitz: fitz
+  Float: sqlmodel.Float
+  Fore: colorama.Fore
+  frontmatter: frontmatter
+  FuncSchema: agents.function_schema.FuncSchema
+  Function: openai.types.chat.chat_completion_message_tool_call.Function
+  function_schema: agents.function_schema.function_schema
+  function_tool: agents.function_tool
+  FunctionCallOutput: openai.types.responses.response_input_item_param.FunctionCallOutput
+  FunctionSpanData: agents.tracing.span_data.FunctionSpanData
+  FunctionTool: agents.FunctionTool
+  FunctionToolParam: openai.types.responses.FunctionToolParam
+  functools: functools
+  gen_trace_id: agents.tracing.gen_trace_id
+  genai: google.genai
+  GenerationSpanData: agents.tracing.span_data.GenerationSpanData
+  GenerationTracingModel: tracing_model.GenerationTracingModel
+  Generator: collections.abc.Generator
+  get_current_trace: agents.tracing.get_current_trace
+  get_env: env.get_env
+  get_event_loop: common.get_event_loop
+  get_logger: utils.get_logger
+  get_model_tracing_impl: agents._run_impl.get_model_tracing_impl
+  get_run_hooks: hooks.get_run_hooks
+  get_runner: runner.get_runner
+  get_tools_map: utils.get_tools_map
+  get_tools_schema: utu.tools.get_tools_schema
+  GitHubToolkit: github_toolkit.GitHubToolkit
+  glob: glob
+  GoogleSearch: search.google_search.GoogleSearch
+  GuardrailSpanData: agents.tracing.span_data.GuardrailSpanData
+  handle_generated_agent: common.handle_generated_agent
+  handle_new_agent: common.handle_new_agent
+  handle_orchestra_events: common.handle_orchestra_events
+  handle_orchestrator_events: common.handle_orchestrator_events
+  handle_raw_stream_events: common.handle_raw_stream_events
+  handle_tool_call_output: common.handle_tool_call_output
+  Handoff: agents.Handoff
+  handoff: agents.handoffs.handoff
+  HandoffCallItem: agents.items.HandoffCallItem
+  HandoffOutputItem: agents.HandoffOutputItem
+  HandoffSpanData: agents.tracing.span_data.HandoffSpanData
+  hashlib: hashlib
+  Headers: openai._types.Headers
+  HistoryManager: IPython.core.history.HistoryManager
+  HttpOptions: google.genai.types.HttpOptions
+  HttpProfile: tencentcloud.common.profile.http_profile.HttpProfile
+  httpx: httpx
+  Image: PIL.Image
+  ImageToolkit: image_toolkit.ImageToolkit
+  init: colorama.init
+  InitContent: common.InitContent
+  initialize: hydra.initialize
+  InputGuardrailResult: agents.guardrail.InputGuardrailResult
+  inspect: inspect
+  Integer: sqlalchemy.Integer
+  InteractiveShell: IPython.core.interactiveshell.InteractiveShell
+  IO: typing.IO
+  io: io
+  ItemHelpers: agents.ItemHelpers
+  Iterable: collections.abc.Iterable
+  Iterator: collections.abc.Iterator
+  JinaCrawl: search.jina_crawl.JinaCrawl
+  JinaSearch: search.jina_search.JinaSearch
+  jinja2: jinja2
+  JSON: sqlmodel.JSON
+  json: json
+  ListAgentsContent: common.ListAgentsContent
+  LitellmModel: agents.extensions.models.litellm_model.LitellmModel
+  Literal: typing.Literal
+  LLMAgent: llm_agent.LLMAgent
+  LLMOutputParser: llm_output_parser.LLMOutputParser
+  load_class_from_file: utils.load_class_from_file
+  load_dotenv: dotenv.load_dotenv
+  logging: logging
+  Mapping: collections.abc.Mapping
+  math: math
+  matplotlib: matplotlib
+  MaxTurnsExceeded: agents.exceptions.MaxTurnsExceeded
+  MCPClient: mcp_client.MCPClient
+  MCPConverter: utils.MCPConverter
+  MCPListToolsSpanData: agents.MCPListToolsSpanData
+  MCPServer: agents.mcp.MCPServer
+  MCPServerSse: agents.mcp.MCPServerSse
+  MCPServerStdio: agents.mcp.MCPServerStdio
+  MCPServerStreamableHttp: agents.mcp.MCPServerStreamableHttp
+  MCPTool: mcp.Tool
+  MCPUtil: agents.mcp.MCPUtil
+  Message: openai.types.responses.response_input_item_param.Message
+  MessageAttributes: openinference.semconv.trace.MessageAttributes
+  MessageContentAttributes: openinference.semconv.trace.MessageContentAttributes
+  MessageOutputItem: agents.MessageOutputItem
+  metadata: importlib.metadata
+  Model: agents.Model
+  model_validator: pydantic.model_validator
+  ModelBehaviorError: agents.exceptions.ModelBehaviorError
+  ModelConfigs: model_config.ModelConfigs
+  ModelInputData: agents.run.ModelInputData
+  ModelResponse: agents.ModelResponse
+  ModelSettings: agents.ModelSettings
+  ModelSettingsConfig: model_config.ModelSettingsConfig
+  ModelTracing: agents.ModelTracing
+  NewAgentContent: common.NewAgentContent
+  NextStepFinalOutput: agents._run_impl.NextStepFinalOutput
+  NextStepHandoff: agents._run_impl.NextStepHandoff
+  NextStepRunAgain: agents._run_impl.NextStepRunAgain
+  NOT_GIVEN: openai._types.NOT_GIVEN
+  NotFound: docker.errors.NotFound
+  NotGiven: openai._types.NotGiven
+  OITracer: openinference.instrumentation.OITracer
+  OmegaConf: omegaconf.OmegaConf
+  oneline_object: utils.oneline_object
+  OpenAIChatCompletionParams: openai_utils.OpenAIChatCompletionParams
+  OpenAIChatCompletionParamsKeys: types.OpenAIChatCompletionParamsKeys
+  OpenAIChatCompletionsModel: agents.OpenAIChatCompletionsModel
+  OpenAIResponsesModel: agents.OpenAIResponsesModel
+  OpenAIResponsesParams: types.OpenAIResponsesParams
+  OpenAIResponsesParamsKeys: types.OpenAIResponsesParamsKeys
+  OpenAIUtils: openai_utils.OpenAIUtils
+  OpenInferenceLLMProviderValues: openinference.semconv.trace.OpenInferenceLLMProviderValues
+  OpenInferenceLLMSystemValues: openinference.semconv.trace.OpenInferenceLLMSystemValues
+  OpenInferenceMimeTypeValues: openinference.semconv.trace.OpenInferenceMimeTypeValues
+  OpenInferenceSpanKindValues: openinference.semconv.trace.OpenInferenceSpanKindValues
+  OpenInferenceTracingProcessor: otel_agents_processor.OpenInferenceTracingProcessor
+  OrchestraAgent: orchestra_agent.OrchestraAgent
+  OrchestraContent: common.OrchestraContent
+  OrchestraStreamEvent: utu.agents.orchestra.OrchestraStreamEvent
+  OrchestraTaskRecorder: common.OrchestraTaskRecorder
+  OrchestratorAgent: orchestrator_agent.OrchestratorAgent
+  OrchestratorStreamEvent: orchestrator.OrchestratorStreamEvent
+  OrderedDict: collections.OrderedDict
+  os: os
+  OtelSpan: opentelemetry.trace.Span
+  Part: google.genai.types.Part
+  partition: unstructured.partition.auto.partition
+  patch_stdout: prompt_toolkit.patch_stdout.patch_stdout
+  Path: pathlib.Path
+  pathlib: pathlib
+  pd: pandas
+  PDFParser: documents.pdf_parser.PDFParser
+  pexpect: pexpect
+  PexpectBash: local_env.bash_pexpect.PexpectBash
+  pickle: pickle
+  Plan: common.Plan
+  PlanItem: common.PlanItem
+  PlannerAgent: planner.PlannerAgent
+  plt: matplotlib.pyplot
+  PortManager: port_manager.PortManager
+  PracticeArguments: practice_config.PracticeArguments
+  PrintUtils: print_utils.PrintUtils
+  prompt_toolkit: prompt_toolkit
+  PythonExecutorToolkit: python_executor_toolkit.PythonExecutorToolkit
+  Query: openai._types.Query
+  QueueCompleteSentinel: common.QueueCompleteSentinel
+  RawResponsesStreamEvent: agents.stream_events.RawResponsesStreamEvent
+  re: re
+  ReactConverter: react_converter.ReactConverter
+  ReactRunner: react_runner.ReactRunner
+  Reasoning: openai.types.shared.Reasoning
+  ReasoningEffort: openai.types.shared.ReasoningEffort
+  ReasoningItem: agents.ReasoningItem
+  Recorder: orchestrator.Recorder
+  register_tool: base.register_tool
+  ReporterAgent: reporter.ReporterAgent
+  ReportItem: common.ReportItem
+  RequestException: requests.exceptions.RequestException
+  requests: requests
+  resources: importlib.resources
+  Response: openai.types.responses.Response
+  ResponseCompletedEvent: openai.types.responses.ResponseCompletedEvent
+  ResponseFormat: openai.types.chat.completion_create_params.ResponseFormat
+  ResponseFunctionToolCall: openai.types.responses.ResponseFunctionToolCall
+  ResponseFunctionToolCallParam: openai.types.responses.ResponseFunctionToolCallParam
+  ResponseInputContentParam: openai.types.responses.ResponseInputContentParam
+  ResponseInputItemParam: openai.types.responses.ResponseInputItemParam
+  ResponseInputParam: openai.types.responses.ResponseInputParam
+  ResponseOutputItem: openai.types.responses.ResponseOutputItem
+  ResponseOutputItemDoneEvent: openai.types.responses.ResponseOutputItemDoneEvent
+  ResponseOutputMessage: openai.types.responses.ResponseOutputMessage
+  ResponseOutputMessageParam: openai.types.responses.ResponseOutputMessageParam
+  ResponseOutputRefusal: openai.types.responses.ResponseOutputRefusal
+  ResponseOutputText: openai.types.responses.ResponseOutputText
+  ResponsePromptParam: openai.types.responses.response_prompt_param.ResponsePromptParam
+  ResponseReasoningItem: openai.types.responses.ResponseReasoningItem
+  ResponsesModel: openai.types.shared.ResponsesModel
+  ResponseSpanData: agents.tracing.span_data.ResponseSpanData
+  ResponseStreamEvent: openai.types.responses.ResponseStreamEvent
+  ResponseTextConfigParam: openai.types.responses.ResponseTextConfigParam
+  ResponseUsage: openai.types.responses.ResponseUsage
+  RunConfig: agents.RunConfig
+  RunContextWrapper: agents.RunContextWrapper
+  RunErrorDetails: agents.exceptions.RunErrorDetails
+  RunHooks: agents.RunHooks
+  RunImpl: agents._run_impl.RunImpl
+  RunItem: agents.RunItem
+  RunItemStreamEvent: agents.stream_events.RunItemStreamEvent
+  Runner: agents.Runner
+  RunOptions: agents.run.RunOptions
+  RunResult: agents.RunResult
+  RunResultStreaming: agents.RunResultStreaming
+  safe_json_dumps: openinference.instrumentation.safe_json_dumps
+  schema_to_basemodel: common.schema_to_basemodel
+  SearchToolkit: search_toolkit.SearchToolkit
+  select: sqlmodel.select
+  Sequence: collections.abc.Sequence
+  serialize_results: e2b_code_interpreter.models.serialize_results
+  SerperToolkit: serper_toolkit.SerperToolkit
+  Session: sqlmodel.Session
+  set_span_in_context: opentelemetry.trace.set_span_in_context
+  set_trace_processors: agents.set_trace_processors
+  setup_logging: log.setup_logging
+  ShellLocalEnv: env.ShellLocalEnv
+  shutil: shutil
+  SimpleAgent: simple_agent.SimpleAgent
+  SimpleAgentGeneratedEvent: utu.meta.simple_agent_generator.SimpleAgentGeneratedEvent
+  SimpleAgentGenerator: utu.meta.simple_agent_generator.SimpleAgentGenerator
+  SimpleMemoryToolkit: memory_toolkit.SimpleMemoryToolkit
+  SimpleWorkerAgent: worker.SimpleWorkerAgent
+  SimplifiedAsyncOpenAI: utils.SimplifiedAsyncOpenAI
+  SingleStepResult: agents._run_impl.SingleStepResult
+  socket: socket
+  Span: agents.tracing.Span
+  SpanAttributes: openinference.semconv.trace.SpanAttributes
+  SpanData: agents.tracing.span_data.SpanData
+  SpanError: agents.tracing.SpanError
+  SQLModel: sqlmodel.SQLModel
+  SQLModelUtils: utils.SQLModelUtils
+  sse_client: mcp.client.sse.sse_client
+  Status: opentelemetry.trace.Status
+  StatusCode: opentelemetry.trace.StatusCode
+  StopAtTools: agents.StopAtTools
+  streamablehttp_client: mcp.client.streamable_http.streamablehttp_client
+  StreamEvent: agents.StreamEvent
+  String: sqlmodel.String
+  Style: colorama.Style
+  subprocess: subprocess
+  Subtask: data.Subtask
+  SwitchAgentContent: common.SwitchAgentContent
+  SwitchAgentRequest: common.SwitchAgentRequest
+  sys: sys
+  TabularDataToolkit: tabular_data_toolkit.TabularDataToolkit
+  Task: orchestrator.Task
+  TaskRecorder: agents.common.TaskRecorder
+  TContext: agents.TContext
+  tempfile: tempfile
+  Template: jinja2.Template
+  text: sqlmodel.text
+  TextDeltaContent: common.TextDeltaContent
+  tiktoken: tiktoken
+  time: time
+  timedelta: datetime.timedelta
+  TimedRotatingFileHandler: logging.handlers.TimedRotatingFileHandler
+  timezone: datetime.timezone
+  TioneEnvManager: utils.tione_manager.TioneEnvManager
+  TokenUtils: token.TokenUtils
+  Tool: agents.Tool
+  tool_cache_model: utu.db.tool_cache_model
+  TOOL_PROMPTS: base.TOOL_PROMPTS
+  ToolAttributes: openinference.semconv.trace.ToolAttributes
+  ToolCacheModel: db.ToolCacheModel
+  ToolCallAttributes: openinference.semconv.trace.ToolCallAttributes
+  ToolCallItem: agents.ToolCallItem
+  ToolCallItemTypes: agents.items.ToolCallItemTypes
+  ToolCallOutputItem: agents.ToolCallOutputItem
+  ToolChoice: openai.types.responses.response_create_params.ToolChoice
+  ToolContext: agents.tool_context.ToolContext
+  ToolFilterStatic: agents.mcp.ToolFilterStatic
+  ToolGenerator: tool_generator_mcp.ToolGenerator
+  ToolInputGuardrailResult: agents.tool_guardrails.ToolInputGuardrailResult
+  TOOLKIT_MAP: tools.TOOLKIT_MAP
+  ToolkitConfig: config.ToolkitConfig
+  ToolOutputGuardrailResult: agents.tool_guardrails.ToolOutputGuardrailResult
+  ToolParam: openai.types.responses.ToolParam
+  ToolTracingModel: tracing_model.ToolTracingModel
+  trace: agents.trace
+  Trace: agents.tracing.Trace
+  trace_api: opentelemetry.trace
+  traceback: traceback
+  TraceConfig: openinference.instrumentation.TraceConfig
+  TraceCtxManager: agents._run_impl.TraceCtxManager
+  Tracer: opentelemetry.trace.Tracer
+  tracing_model: utu.db.tracing_model
+  TracingProcessor: agents.tracing.TracingProcessor
+  TrainingFreeGRPOConfig: practice_config.TrainingFreeGRPOConfig
+  trajectory_model: utu.db.trajectory_model
+  TrajectoryModel: db.TrajectoryModel
+  TranscriptionVerbose: openai.types.audio.TranscriptionVerbose
+  TResponseInputItem: agents.TResponseInputItem
+  TResponseStreamEvent: agents.items.TResponseStreamEvent
+  TYPE_CHECKING: typing.TYPE_CHECKING
+  TypedDict: typing.TypedDict
+  types: mcp.types
+  TypeVar: typing_extensions.TypeVar
+  Unpack: typing_extensions.Unpack
+  UnstructuredParser: documents.unstructured_parser.UnstructuredParser
+  urlparse: urllib.parse.urlparse
+  Usage: agents.usage.Usage
+  UserAnswer: common.UserAnswer
+  UserError: agents.exceptions.UserError
+  UserInteractionToolkit: tools.UserInteractionToolkit
+  UserQuery: common.UserQuery
+  UserRequest: common.UserRequest
+  util: importlib.util
+  UTUAgentRunner: openai_runner.UTUAgentRunner
+  UTUBaseModel: utu_basemodel.UTUBaseModel
+  uuid: uuid
+  VideoToolkit: video_toolkit.VideoToolkit
+  web: tornado.web
+  websocket: tornado.websocket
+  WebUIAgents: utu.ui.webui_agents.WebUIAgents
+  wikipediaapi: wikipediaapi
+  WikipediaSearchTool: wikipedia_toolkit.WikipediaSearchTool
+  WorkerItem: common.WorkerItem
+  WorkerResult: common.WorkerResult
+  WorkforceAgent: workforce_agent.WorkforceAgent
+  WorkspaceTaskRecorder: data.WorkspaceTaskRecorder
+  wraps: functools.wraps
+  yaml: yaml
+
+functions:
+  __aenter__:
+    type: async
+    module: utu.agents.simple_agent
+    args: [self]
+    params:
+      returns: SimpleAgent
+  __aexit__:
+    type: async
+    module: utu.agents.simple_agent
+    args: [self, exc_type, exc_val, exc_tb]
+  __init__:
+    type: sync
+    module: utu.agents.workforce.planner
+    args: [self, config]
+  __launch:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, port, ip, autoload]
+  __repr__:
+    type: sync
+    module: utu.config.base_config
+    args: [self]
+    params:
+      returns: str
+  __str__:
+    type: sync
+    module: utu.config.base_config
+    args: [self]
+    params:
+      returns: str
+  _as_utc_nano:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [dt]
+    params:
+      returns: int
+  _check_errors:
+    type: sync
+    module: utu.agents.common
+    args: [self]
+  _check_openskills_installed:
+    type: sync
+    module: utu.env.shell_local_env
+    params:
+      returns: bool
+  _check_too_long:
+    type: sync
+    module: utu.runner.openai_runner
+    args: [cls, new_response, context_wrapper]
+    params:
+      returns: ModelResponse
+  _cleanup_tasks:
+    type: sync
+    module: utu.agents.common
+    args: [self]
+  _context_manager_preprocess:
+    type: sync
+    module: utu.runner.openai_runner
+    args: [cls, input, context_wrapper]
+    params:
+      returns: list[TResponseInputItem]
+  _convert_to_primitive:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [value]
+  _copy_input:
+    type: sync
+    module: utu.runner.react_runner
+    args: [input]
+  _create_backup:
+    type: sync
+    module: utu.tools.local_env.file_edit
+    args: [self, file_path]
+    params:
+      returns: None
+  _edit_memory:
+    type: sync
+    module: utu.tools.memory_toolkit
+    args: [self, old_string, new_string]
+    params:
+      returns: str
+  _extract_analysis:
+    type: sync
+    module: utu.agents.orchestra.planner
+    args: [self, text]
+    params:
+      returns: str
+  _extract_container_info:
+    type: sync
+    module: utu.env.utils.docker_manager
+    args: [self, container]
+    params:
+      returns: dict
+  _extract_links:
+    type: async
+    module: utu.tools.search_toolkit
+    args: [self, url, content, query]
+    params:
+      returns: str
+  _extract_plan:
+    type: sync
+    module: utu.agents.orchestra.planner
+    args: [self, text]
+    params:
+      returns: list[Subtask]
+  _flatten:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, prefix]
+    params:
+      returns: Iterator[tuple]
+  _format_available_agents:
+    type: sync
+    module: utu.agents.orchestra.planner
+    args: [self, agents]
+    params:
+      returns: str
+  _format_task:
+    type: sync
+    module: utu.agents.orchestra.worker
+    args: [self, task_recorder, subtask]
+    params:
+      returns: str
+  _get_all_tools:
+    type: async
+    module: utu.runner.react_runner
+    args: [agent, context_wrapper]
+    params:
+      returns: list[Tool]
+  _get_attributes_from_chat_completions_input:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_chat_completions_message_content:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, prefix]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_chat_completions_message_content_item:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, prefix]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_chat_completions_message_dicts:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, prefix, msg_idx, tool_call_idx]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_chat_completions_output:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_chat_completions_tool_call_dict:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, prefix]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_chat_completions_usage:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_function_call_output:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, prefix]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_function_span_data:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_function_tool_call:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, prefix]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_generation_span_data:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_input:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, msg_idx]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_mcp_list_tool_span_data:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_message:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, prefix]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_message_content_list:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, prefix]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_message_param:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, prefix]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_response:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_response_function_tool_call_param:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, prefix]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_response_instruction:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [instructions]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_response_output:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj, msg_idx]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_tools:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [tools]
+    params:
+      returns: Iterator[tuple]
+  _get_attributes_from_usage:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj]
+    params:
+      returns: Iterator[tuple]
+  _get_background_info:
+    type: async
+    module: utu.agents.orchestra.planner
+    args: [self, task_recorder]
+    params:
+      returns: str
+  _get_config:
+    type: sync
+    module: utu.agents.simple_agent
+    args: [self, config]
+    params:
+      returns: AgentConfig
+  _get_config_name:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self]
+  _get_context:
+    type: sync
+    module: utu.agents.simple_agent
+    args: [self]
+    params:
+      returns: dict
+  _get_current_agent_content:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self]
+  _get_handoffs:
+    type: async
+    module: utu.runner.react_runner
+    args: [agent, context_wrapper]
+    params:
+      returns: list[Handoff]
+  _get_model:
+    type: sync
+    module: utu.agents.simple_agent
+    args: [self, config, model]
+    params:
+      returns: Model
+  _get_model_settings:
+    type: sync
+    module: utu.agents.simple_agent
+    args: [self, config, model_settings]
+    params:
+      returns: ModelSettings
+  _get_output_schema:
+    type: sync
+    module: utu.runner.react_runner
+    args: [agent]
+  _get_run_config:
+    type: sync
+    module: utu.agents.simple_agent
+    args: [self]
+    params:
+      returns: RunConfig
+  _get_search_results:
+    type: sync
+    module: utu.tools.arxiv_toolkit
+    args: [self, query, paper_ids, max_results]
+    params:
+      returns: Generator
+  _get_single_step_result_from_response:
+    type: async
+    module: utu.runner.react_runner
+    args: [cls, agent, original_input, pre_step_items, new_response, output_schema, all_tools, handoffs, hooks, context_wrapper,
+      run_config, tool_use_tracker, event_queue]
+    params:
+      returns: SingleStepResult
+  _get_span_kind:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj]
+    params:
+      returns: str
+  _get_span_name:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj]
+    params:
+      returns: str
+  _get_span_status:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [obj]
+    params:
+      returns: Status
+  _get_template:
+    type: sync
+    module: utu.agents.orchestra.reporter
+    args: [self]
+  _handle_answer:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, answer]
+  _handle_answer_noexcept:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, answer]
+  _handle_config:
+    type: sync
+    module: utu.agents.orchestrator_agent
+    args: [self, config]
+    params:
+      returns: None
+  _handle_error:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, message]
+  _handle_gen_agent:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self]
+  _handle_gen_agent_noexcept:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self]
+  _handle_input:
+    type: sync
+    module: utu.models.react_converter
+    args: [self, system_instructions, input]
+  _handle_list_agents:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self]
+  _handle_list_agents_noexcept:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self]
+  _handle_model_settings:
+    type: sync
+    module: utu.models.react_converter
+    args: [self, model_settings]
+    params:
+      returns: ModelSettings
+  _handle_query:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, query]
+  _handle_query_noexcept:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, query]
+  _handle_sp:
+    type: sync
+    module: utu.models.react_converter
+    args: [self, system_instructions, tools, handoffs]
+  _handle_switch_agent:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, switch_agent_request]
+  _handle_switch_agent_noexcept:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, switch_agent_request]
+  _init_db_schema:
+    type: sync
+    module: utu.utils.sqlmodel_utils
+    args: [engine]
+  _init_environment:
+    type: sync
+    module: utu.meta.tool_generator_mcp
+    args: [self, odir]
+  _instrument:
+    type: sync
+    module: utu.tracing.otel_agents_instrumentor
+    args: [self]
+    params:
+      returns: None
+  _is_first_query:
+    type: sync
+    module: utu.context.env_context_manager
+    args: [input]
+    params:
+      returns: bool
+  _is_our_container:
+    type: sync
+    module: utu.env.utils.docker_manager
+    args: [self, container, image_prefix]
+    params:
+      returns: bool
+  _load_available_agents:
+    type: sync
+    module: utu.agents.orchestra.planner
+    args: [self]
+    params:
+      returns: None
+  _load_builtin_toolkit:
+    type: async
+    module: utu.agents.simple_agent
+    args: [self, toolkit_config, env]
+    params:
+      returns: AsyncBaseToolkit
+  _load_config_to_dict:
+    type: sync
+    module: utu.config.loader
+    args: [cls, name, config_path]
+    params:
+      returns: dict
+  _load_customized_toolkit:
+    type: async
+    module: utu.agents.simple_agent
+    args: [self, toolkit_config, env]
+    params:
+      returns: AsyncBaseToolkit
+  _load_image:
+    type: sync
+    module: utu.tools.image_toolkit
+    args: [self, image_path]
+    params:
+      returns: str
+  _load_mcp_server:
+    type: async
+    module: utu.agents.simple_agent
+    args: [self, toolkit_config]
+    params:
+      returns: MCPServer
+  _load_planner_examples:
+    type: sync
+    module: utu.agents.orchestra.planner
+    args: [self]
+    params:
+      returns: None
+  _load_tabular_data:
+    type: sync
+    module: utu.tools.tabular_data_toolkit
+    args: [self, file_path]
+    params:
+      returns: pd.DataFrame
+  _load_toolkit:
+    type: async
+    module: utu.agents.simple_agent
+    args: [self, toolkit_config, env]
+  _load_toolkits_config:
+    type: async
+    module: utu.agents.simple_agent
+    args: [self, env]
+  _maybe_filter_model_input:
+    type: async
+    module: utu.runner.react_runner
+    args: [agent, run_config, context_wrapper, input_items, system_instructions]
+  _merge_default_config:
+    type: sync
+    module: utu.utils.openai_utils.simplified_client
+    args: [self, kwargs, default_config]
+    params:
+      returns: dict
+  _parse:
+    type: sync
+    module: utu.agents.orchestrator.chain
+    args: [self, text, recorder]
+    params:
+      returns: Plan
+  _parse_assign_result:
+    type: sync
+    module: utu.agents.workforce.assigner
+    args: [self, response]
+  _parse_check_response:
+    type: sync
+    module: utu.agents.workforce.planner
+    args: [self, response]
+    params:
+      returns: str
+  _parse_final_response:
+    type: sync
+    module: utu.agents.workforce.answerer
+    args: [self, response]
+    params:
+      returns: str
+  _parse_react_output:
+    type: sync
+    module: utu.models.react_converter
+    args: [self, text_output]
+    params:
+      returns: list[ResponseOutputItem]
+  _parse_task_check_result:
+    type: sync
+    module: utu.agents.workforce.executor
+    args: [self, response]
+    params:
+      returns: bool
+  _parse_update_response:
+    type: sync
+    module: utu.agents.workforce.planner
+    args: [self, response]
+    params:
+      returns: tuple
+  _prepare_input_with_session:
+    type: async
+    module: utu.runner.react_runner
+    args: [cls, input, session, session_input_callback]
+  _prepare_run_kwargs:
+    type: sync
+    module: utu.agents.simple_agent
+    args: [self, input]
+    params:
+      returns: dict
+  _process_kwargs:
+    type: sync
+    module: utu.utils.openai_utils.simplified_client
+    args: [self, kwargs]
+    params:
+      returns: dict
+  _process_streamed:
+    type: async
+    module: utu.agents.orchestra.reporter
+    args: [self, run_result_streaming, task_recorder]
+  _qa:
+    type: async
+    module: utu.tools.search_toolkit
+    args: [self, content, query]
+    params:
+      returns: str
+  _read_memory:
+    type: sync
+    module: utu.tools.memory_toolkit
+    args: [self]
+    params:
+      returns: str
+  _resolve_filepath:
+    type: sync
+    module: utu.tools.local_env.file_edit
+    args: [self, file_path]
+    params:
+      returns: Path
+  _run_single_turn:
+    type: async
+    module: utu.runner.openai_runner
+    args: [cls]
+    params:
+      returns: SingleStepResult
+  _run_single_turn_streamed:
+    type: async
+    module: utu.runner.react_runner
+    args: [cls, streamed_result, agent, hooks, context_wrapper, run_config, should_run_agent_start_hooks, tool_use_tracker,
+      all_tools]
+    params:
+      returns: SingleStepResult
+  _run_task:
+    type: async
+    module: utu.agents.orchestrator_agent
+    args: [self, recorder, task]
+  _sanitize_filename:
+    type: sync
+    module: utu.tools.local_env.file_edit
+    args: [self, filename]
+    params:
+      returns: str
+  _save_result_to_session:
+    type: async
+    module: utu.runner.react_runner
+    args: [cls, session, original_input, new_items]
+    params:
+      returns: None
+  _search:
+    type: async
+    module: utu.tools.serper_toolkit
+    args: [self, endpoint, payload]
+    params:
+      returns: dict
+  _send_delta:
+    type: sync
+    module: utu.ui.common
+    args: [delta, type, inprogress, allow_empty]
+  _setup_skills:
+    type: sync
+    module: utu.env.shell_local_env
+    args: [self]
+  _setup_workers:
+    type: sync
+    module: utu.agents.orchestrator_agent
+    args: [self]
+    params:
+      returns: dict
+  _setup_workspace_for_toolkits:
+    type: sync
+    module: utu.agents.simple_agent
+    args: [self]
+  _start_streaming:
+    type: async
+    module: utu.agents.simple_agent
+    args: [self, recorder, save, log_to_db]
+  _streaming_loop:
+    type: async
+    module: utu.runner.react_runner
+    args: [cls, starting_input, streamed_result, starting_agent, max_turns, hooks, context_wrapper, run_config, session]
+    params:
+      returns: None
+  _stringify_column_info:
+    type: sync
+    module: utu.tools.tabular_data_toolkit
+    args: [self, column_info, return_feat]
+    params:
+      returns: str
+  _uninstrument:
+    type: sync
+    module: utu.tracing.otel_agents_instrumentor
+    args: [self]
+    params:
+      returns: None
+  _write_memory:
+    type: sync
+    module: utu.tools.memory_toolkit
+    args: [self, content]
+    params:
+      returns: str
+  add:
+    type: sync
+    module: utu.db.db_service
+    args: [data]
+    params:
+      returns: bool
+  add_indented_lines:
+    type: sync
+    module: utu.meta.simple_agent_generator
+    args: [lines, indent]
+    params:
+      returns: str
+  add_run_result:
+    type: sync
+    module: utu.agents.common
+    args: [self, run_result, agent_name]
+  allocate_port:
+    type: sync
+    module: utu.env.utils.port_manager
+    args: [self]
+  answer_check:
+    type: async
+    module: utu.agents.workforce.answerer
+    args: [self, question, model_answer, ground_truth]
+    params:
+      returns: bool
+  apply_diff:
+    type: sync
+    module: utu.utils.path
+    args: [content, diff]
+    params:
+      returns: str
+  as_dict:
+    type: sync
+    module: utu.db.utu_basemodel
+    args: [self]
+    params:
+      returns: dict
+  ask_user:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, question]
+    params:
+      returns: str
+  assert_env:
+    type: sync
+    module: utu.utils.env
+    args: [key]
+    params:
+      returns: None
+  assert_never:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    params:
+      returns: Any
+  assign_task:
+    type: async
+    module: utu.agents.workforce.assigner
+    args: [self, recorder]
+    params:
+      returns: Subtask
+  async_file_cache:
+    type: sync
+    module: utu.utils.tool_cache
+    args: [cache_dir, expire_time, mode]
+  async_print_input:
+    type: async
+    module: utu.utils.print_utils
+    args: [prompt_text]
+    params:
+      returns: str
+  audio_qa:
+    type: async
+    module: utu.tools.audio_toolkit
+    args: [self, audio_path, question]
+    params:
+      returns: str
+  autocomplete:
+    type: async
+    module: utu.tools.serper_toolkit
+    args: [self, query, location, gl, hl]
+    params:
+      returns: dict
+  build:
+    type: async
+    module: utu.env.e2b_env
+    args: [self]
+  build_context_manager:
+    type: sync
+    module: utu.context
+    args: [config]
+  call_json:
+    type: async
+    module: utu.env.utils.tione_manager
+    args: [self, action, params]
+    params:
+      returns: dict
+  call_tool:
+    type: async
+    module: utu.tools.base
+    args: [self, name, arguments]
+    params:
+      returns: str
+  camel_to_snake:
+    type: sync
+    module: utu.utils.llm_output_parser
+    args: [name]
+    params:
+      returns: str
+  cancel:
+    type: sync
+    module: utu.agents.common
+    args: [self]
+    params:
+      returns: None
+  chat:
+    type: async
+    module: utu.agents.simple_agent
+    args: [self, input]
+    params:
+      returns: TaskRecorder
+  chat_completions_create:
+    type: async
+    module: utu.utils.openai_utils.simplified_client
+    args: [self]
+  chat_streamed:
+    type: async
+    module: utu.agents.simple_agent
+    args: [self, input]
+    params:
+      returns: TaskRecorder
+  check_db_available:
+    type: sync
+    module: utu.utils.sqlmodel_utils
+    args: [cls, force_check, cache_ttl]
+    params:
+      returns: bool
+  check_known_keys:
+    type: sync
+    module: utu.utils.openai_utils.simplified_client
+    args: [self, kwargs, known_keys]
+    params:
+      returns: set
+  check_origin:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self, origin]
+  clean_up_workspace:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self]
+  cleanup:
+    type: async
+    module: utu.env.e2b_env
+    args: [self]
+  clear_input_items:
+    type: sync
+    module: utu.agents.simple_agent
+    args: [self]
+  client_call_json:
+    type: sync
+    module: utu.env.utils.tione_manager
+    args: [self, action, params]
+    params:
+      returns: dict
+  command_exit_exception_to_str:
+    type: sync
+    module: utu.tools.utils
+    args: [cls, command_exception]
+    params:
+      returns: str
+  command_result_to_str:
+    type: sync
+    module: utu.tools.utils
+    args: [cls, command_result]
+    params:
+      returns: str
+  compactify_memory:
+    type: async
+    module: utu.tools.memory_toolkit
+    args: [self]
+    params:
+      returns: str
+  convert_model_settings:
+    type: sync
+    module: utu.utils.agents_utils
+    args: [params]
+    params:
+      returns: ModelSettings
+  convert_sp_input:
+    type: sync
+    module: utu.utils.agents_utils
+    args: [messages]
+    params:
+      returns: tuple
+  convert_tool:
+    type: sync
+    module: utu.utils.agents_utils
+    args: [tool]
+    params:
+      returns: FunctionTool
+  count_tokens:
+    type: sync
+    module: utu.utils.token
+    args: [text]
+    params:
+      returns: int
+  crawl:
+    type: async
+    module: utu.tools.search.jina_crawl
+    args: [self, url]
+    params:
+      returns: str
+  crawl_crawl4ai:
+    type: async
+    module: utu.tools.search.crawl4ai_crawl
+    args: [self, url]
+    params:
+      returns: str
+  crawl_jina:
+    type: async
+    module: utu.tools.search.jina_crawl
+    args: [self, url]
+    params:
+      returns: str
+  create_cached_db:
+    type: sync
+    module: utu.utils.tool_cache
+    args: [expire_time]
+  create_cached_file:
+    type: sync
+    module: utu.utils.tool_cache
+    args: [cache_path, expire_time]
+  create_env:
+    type: async
+    module: utu.env.utils.tione_manager
+    args: [self]
+    params:
+      returns: dict
+  create_on_invoke_tool:
+    type: sync
+    module: utu.env.browser_tione_env
+    args: [tool_name]
+  create_plan:
+    type: async
+    module: utu.agents.orchestra.planner
+    args: [self, task_recorder]
+    params:
+      returns: CreatePlanResult
+  create_session:
+    type: sync
+    module: utu.utils.sqlmodel_utils
+  decorator:
+    type: sync
+    module: utu.tools.utils
+    args: [func]
+  decorator_db:
+    type: sync
+    module: utu.utils.tool_cache
+    args: [func]
+  decorator_file:
+    type: sync
+    module: utu.utils.tool_cache
+    args: [func]
+  delete:
+    type: sync
+    module: utu.db.db_service
+    args: [data]
+    params:
+      returns: bool
+  delete_env:
+    type: async
+    module: utu.env.utils.tione_manager
+    args: [self, env_id]
+  delete_session:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self]
+  describe_env:
+    type: async
+    module: utu.env.utils.tione_manager
+    args: [self, env_id]
+    params:
+      returns: dict
+  describe_envs:
+    type: async
+    module: utu.env.utils.tione_manager
+    args: [self]
+    params:
+      returns: list[dict]
+  document_parse:
+    type: async
+    module: utu.tools.document_toolkit
+    args: [self, document_path, chunk_size, chunk_id]
+    params:
+      returns: str
+  document_qa:
+    type: async
+    module: utu.tools.document_toolkit
+    args: [self, document_path, question]
+    params:
+      returns: str
+  download_file:
+    type: sync
+    module: utu.utils.path
+    args: [url, save_path]
+    params:
+      returns: str
+  download_papers:
+    type: async
+    module: utu.tools.arxiv_toolkit
+    args: [self, query, paper_ids, max_results, output_dir]
+    params:
+      returns: str
+  edit_file:
+    type: async
+    module: utu.tools.local_env.file_edit
+    args: [self, path, diff]
+    params:
+      returns: str
+  encode_image:
+    type: sync
+    module: utu.utils.image
+    args: [image_path]
+    params:
+      returns: str
+  ensure_package:
+    type: sync
+    module: utu.utils.env
+    args: [package_name]
+    params:
+      returns: None
+  execute_python_code:
+    type: async
+    module: utu.tools.python_executor_toolkit
+    args: [self, code, timeout]
+    params:
+      returns: dict
+  execute_python_code_async:
+    type: async
+    module: utu.tools.local_env.python
+    args: [code, workdir, timeout]
+    params:
+      returns: dict
+  execute_python_code_sync:
+    type: sync
+    module: utu.tools.local_env.python
+    args: [code, workdir]
+  execute_task:
+    type: async
+    module: utu.agents.workforce.executor
+    args: [self, recorder, task]
+    params:
+      returns: None
+  execution_to_str:
+    type: sync
+    module: utu.tools.utils
+    args: [cls, execution]
+    params:
+      returns: str
+  extract_code_block_with_language:
+    type: sync
+    module: utu.utils.llm_output_parser
+    args: [s, language]
+    params:
+      returns: str
+  extract_code_blocks:
+    type: sync
+    module: utu.utils.llm_output_parser
+    args: [s]
+    params:
+      returns: list[tuple]
+  extract_code_json:
+    type: sync
+    module: utu.utils.llm_output_parser
+    args: [s, try_parse]
+  extract_code_python:
+    type: sync
+    module: utu.utils.llm_output_parser
+    args: [s]
+    params:
+      returns: str
+  extract_final_answer:
+    type: async
+    module: utu.agents.workforce.answerer
+    args: [self, recorder]
+    params:
+      returns: str
+  extract_float_number:
+    type: sync
+    module: utu.utils.llm_output_parser
+    args: [s, return_last]
+  file_exists:
+    type: sync
+    module: utu.utils.path
+    args: [file_path]
+    params:
+      returns: bool
+  files_edit_diff:
+    type: async
+    module: utu.env.e2b_env
+    args: [self, path, diff]
+    params:
+      returns: str
+  files_read:
+    type: async
+    module: utu.env.e2b_env
+    args: [self, path]
+    params:
+      returns: str
+  files_write:
+    type: async
+    module: utu.env.e2b_env
+    args: [self, path, data]
+    params:
+      returns: str
+  filter_items:
+    type: sync
+    module: utu.utils.agents_utils
+    args: [cls, items]
+  filter_results:
+    type: sync
+    module: utu.tools.utils
+    args: [self, results, limit, key]
+    params:
+      returns: list[dict]
+  find_all:
+    type: async
+    module: utu.env.utils.docker_manager
+    args: [self, stop]
+    params:
+      returns: dict
+  force_flush:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [self]
+    params:
+      returns: None
+  format_config:
+    type: sync
+    module: utu.meta.simple_agent_generator
+    args: [self, task_recorder]
+    params:
+      returns: tuple
+  format_json:
+    type: sync
+    module: utu.utils.print_utils
+    args: [obj, indent]
+    params:
+      returns: str
+  from_dict:
+    type: sync
+    module: utu.db.utu_basemodel
+    args: [cls, data]
+  from_task_recorder:
+    type: sync
+    module: utu.db.trajectory_model
+    args: [cls, task_recorder]
+    params:
+      returns: TrajectoryModel
+  function_tool_to_mcp:
+    type: sync
+    module: utu.utils.mcp_utils
+    args: [cls, tool]
+    params:
+      returns: types.Tool
+  gen_session_id:
+    type: sync
+    module: utu.ui.webui_agents
+  gen_trace_id:
+    type: sync
+    module: utu.utils.agents_utils
+    params:
+      returns: str
+  generate_group_id:
+    type: sync
+    module: utu.utils.agents_utils
+    params:
+      returns: str
+  get:
+    type: sync
+    module: utu.db.utu_basemodel
+    args: [self, key, default]
+  get_agent:
+    type: sync
+    module: utu.agents
+    args: [config]
+  get_agents_model:
+    type: sync
+    module: utu.utils.agents_utils
+    args: [type, model, base_url, api_key]
+    params:
+      returns: Model
+  get_all_status:
+    type: sync
+    module: utu.env.utils.docker_manager
+    args: [self]
+    params:
+      returns: dict
+  get_attr:
+    type: sync
+    module: utu.agents.common
+    args: [self, key]
+    params:
+      returns: Any
+  get_by_id:
+    type: sync
+    module: utu.db.db_service
+    args: [model_class, id]
+  get_column_info:
+    type: async
+    module: utu.tools.tabular_data_toolkit
+    args: [self, file_path]
+    params:
+      returns: str
+  get_current_trace:
+    type: sync
+    module: utu.utils.agents_utils
+    params:
+      returns: Trace
+  get_engine:
+    type: sync
+    module: utu.utils.sqlmodel_utils
+    args: [cls]
+  get_env:
+    type: sync
+    module: utu.utils.env
+    args: [key, default]
+  get_event_loop:
+    type: sync
+    module: utu.utils.common
+    params:
+      returns: asyncio.AbstractEventLoop
+  get_extra_sp:
+    type: sync
+    module: utu.env.shell_local_env
+    args: [self]
+    params:
+      returns: str
+  get_file_ext:
+    type: sync
+    module: utu.utils.path
+    args: [file_path]
+    params:
+      returns: str
+  get_file_md5:
+    type: sync
+    module: utu.utils.path
+    args: [file_path]
+    params:
+      returns: str
+  get_host_ip:
+    type: sync
+    module: utu.env.utils.port_manager
+    args: [self]
+    params:
+      returns: str
+  get_jinja_env:
+    type: sync
+    module: utu.utils.path
+    args: [directory]
+    params:
+      returns: Environment
+  get_jinja_template:
+    type: sync
+    module: utu.utils.path
+    args: [template_path]
+    params:
+      returns: Template
+  get_jinja_template_str:
+    type: sync
+    module: utu.utils.path
+    args: [template_str]
+    params:
+      returns: Template
+  get_logger:
+    type: sync
+    module: utu.utils.log
+    args: [name, level]
+    params:
+      returns: logging.Logger
+  get_mcp_client:
+    type: async
+    module: utu.env.utils.mcp_client
+    args: [cls, url]
+    params:
+      returns: AsyncGenerator
+  get_mcp_server:
+    type: sync
+    module: utu.utils.mcp_utils
+    args: [cls, config]
+  get_mcp_tools_schema:
+    type: async
+    module: utu.utils.mcp_utils
+    args: [cls, config]
+    params:
+      returns: dict
+  get_message_from_image:
+    type: sync
+    module: utu.utils.agents_utils
+    args: [image_url]
+    params:
+      returns: dict
+  get_next_task:
+    type: async
+    module: utu.agents.orchestrator.chain
+    args: [self, recorder]
+  get_package_path:
+    type: sync
+    module: utu.utils.path
+    params:
+      returns: pathlib.Path
+  get_params:
+    type: sync
+    module: utu.env.utils.tione_manager
+    args: [self]
+  get_python_type:
+    type: sync
+    module: utu.utils.common
+    args: [prop_schema]
+  get_react_model:
+    type: sync
+    module: utu.models.react
+    args: [model, api_key, base_url]
+    params:
+      returns: ReactModel
+  get_repo_info:
+    type: async
+    module: utu.tools.github_toolkit
+    args: [self, github_url]
+    params:
+      returns: dict
+  get_response:
+    type: async
+    module: utu.models.react
+    args: [self, system_instructions, input, model_settings, tools, output_schema, handoffs, tracing, previous_response_id,
+      prompt]
+    params:
+      returns: ModelResponse
+  get_response_configs:
+    type: sync
+    module: utu.utils.openai_utils.openai_utils
+    args: [response, include_output]
+    params:
+      returns: dict
+  get_response_output:
+    type: sync
+    module: utu.utils.openai_utils.openai_utils
+    args: [response]
+    params:
+      returns: list[dict]
+  get_run_hooks:
+    type: sync
+    module: utu.hooks
+    args: [config]
+    params:
+      returns: RunHooks
+  get_run_result:
+    type: sync
+    module: utu.agents.common
+    args: [self]
+    params:
+      returns: RunResult
+  get_runner:
+    type: sync
+    module: utu.runner
+    args: [name]
+    params:
+      returns: object
+  get_state:
+    type: sync
+    module: utu.env.e2b_env
+    args: [self]
+    params:
+      returns: str
+  get_status:
+    type: sync
+    module: utu.env.utils.docker_manager
+    args: [self, id]
+    params:
+      returns: dict
+  get_tabular_columns:
+    type: sync
+    module: utu.tools.tabular_data_toolkit
+    args: [self, file_path, return_feat]
+    params:
+      returns: str
+  get_time:
+    type: sync
+    module: utu.env.base_env
+    params:
+      returns: str
+  get_tool_schema:
+    type: sync
+    module: scripts.utils.dump_tool_schemas
+    params:
+      returns: dict
+  get_toolkits_map:
+    type: sync
+    module: utu.tools
+    args: [names]
+    params:
+      returns: dict
+  get_tools:
+    type: async
+    module: utu.agents.simple_agent
+    args: [self, env]
+    params:
+      returns: list[Tool]
+  get_tools_agents:
+    type: async
+    module: utu.utils.mcp_utils
+    args: [cls, mcp_server]
+    params:
+      returns: list[Tool]
+  get_tools_in_agents:
+    type: sync
+    module: utu.tools.base
+    args: [self]
+    params:
+      returns: list[FunctionTool]
+  get_tools_in_mcp:
+    type: sync
+    module: utu.tools.base
+    args: [self]
+    params:
+      returns: list[types.Tool]
+  get_tools_in_openai:
+    type: sync
+    module: utu.tools.base
+    args: [self]
+    params:
+      returns: list[dict]
+  get_tools_map:
+    type: async
+    module: utu.tools.serper_toolkit
+    args: [self]
+    params:
+      returns: dict
+  get_tools_map_func:
+    type: sync
+    module: utu.tools.base
+    args: [self]
+    params:
+      returns: dict
+  get_tools_mcp:
+    type: async
+    module: utu.utils.mcp_utils
+    args: [cls, config]
+    params:
+      returns: list[MCPTool]
+  get_tools_schema:
+    type: sync
+    module: utu.tools.utils
+    args: [cls]
+    params:
+      returns: dict
+  get_trajectory_from_agent_result:
+    type: sync
+    module: utu.utils.agents_utils
+    args: [agent_result, agent_name]
+    params:
+      returns: dict
+  get_url_type:
+    type: sync
+    module: utu.env.utils.mcp_client
+    args: [cls, url]
+    params:
+      returns: Literal
+  google_lens:
+    type: async
+    module: utu.tools.serper_toolkit
+    args: [self, url, gl, hl, num]
+    params:
+      returns: dict
+  google_search:
+    type: async
+    module: utu.tools.serper_toolkit
+    args: [self, query, location, gl, hl, num, date_range]
+    params:
+      returns: dict
+  handle_generated_agent:
+    type: async
+    module: utu.ui.common
+    args: [event]
+  handle_input:
+    type: async
+    module: utu.agents.orchestrator.chain
+    args: [self, recorder]
+  handle_new_agent:
+    type: async
+    module: utu.ui.common
+    args: [event]
+  handle_orchestra_events:
+    type: async
+    module: utu.ui.common
+    args: [event]
+  handle_orchestrator_events:
+    type: async
+    module: utu.ui.common
+    args: [event]
+  handle_path:
+    type: sync
+    module: utu.tools.audio_toolkit
+    args: [self, path]
+    params:
+      returns: str
+  handle_query_worker:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self]
+  handle_raw_stream_events:
+    type: async
+    module: utu.ui.common
+    args: [event]
+  handle_tool_call_output:
+    type: async
+    module: utu.ui.common
+    args: [event]
+  if_need_secure:
+    type: sync
+    module: utu.config.base_config
+    args: [key]
+    params:
+      returns: bool
+  image_qa:
+    type: async
+    module: utu.tools.image_toolkit
+    args: [self, image_path, question]
+    params:
+      returns: str
+  image_search:
+    type: async
+    module: utu.tools.serper_toolkit
+    args: [self, query, location, gl, hl, num, date_range]
+    params:
+      returns: dict
+  init_workspace:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self]
+  initialize:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self, workspace]
+  instantiate_agent:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, config]
+  instrumentation_dependencies:
+    type: sync
+    module: utu.tracing.otel_agents_instrumentor
+    args: [self]
+    params:
+      returns: Collection[str]
+  is_port_available:
+    type: sync
+    module: utu.env.utils.port_manager
+    args: [self, port]
+    params:
+      returns: bool
+  is_web_url:
+    type: sync
+    module: utu.utils.path
+    args: [url]
+    params:
+      returns: bool
+  items_to_dict:
+    type: sync
+    module: utu.utils.agents_utils
+    args: [cls, items]
+    params:
+      returns: list[dict]
+  items_to_messages:
+    type: sync
+    module: utu.utils.agents_utils
+    args: [cls, items]
+    params:
+      returns: list[ChatCompletionMessageParam]
+  launch:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self, port, ip, autoload]
+  launch_async:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, port, ip, autoload]
+  load_agent_config:
+    type: sync
+    module: utu.config.loader
+    args: [cls, name]
+    params:
+      returns: AgentConfig
+  load_class_from_file:
+    type: sync
+    module: utu.utils.common
+    args: [filepath, class_name]
+    params:
+      returns: type
+  load_eval_config:
+    type: sync
+    module: utu.config.loader
+    args: [cls, name]
+    params:
+      returns: EvalConfig
+  load_json:
+    type: sync
+    module: utu.utils.path
+    args: [file_path]
+    params:
+      returns: dict
+  load_json_data:
+    type: sync
+    module: utu.utils.path
+    args: [file_path]
+    params:
+      returns: list[dict]
+  load_model_config:
+    type: sync
+    module: utu.config.loader
+    args: [cls, name]
+    params:
+      returns: ModelConfigs
+  load_prompts:
+    type: sync
+    module: utu.utils.path
+    args: [fn]
+    params:
+      returns: dict
+  load_toolkit_config:
+    type: sync
+    module: utu.config.loader
+    args: [cls, name]
+    params:
+      returns: ToolkitConfig
+  load_training_free_grpo_config:
+    type: sync
+    module: utu.config.loader
+    args: [cls, name]
+    params:
+      returns: TrainingFreeGRPOConfig
+  load_yaml:
+    type: sync
+    module: utu.utils.path
+    args: [file_path]
+    params:
+      returns: dict
+  log_error_with_exc:
+    type: sync
+    module: utu.utils.log
+    args: [msg]
+  main:
+    type: sync
+    module: scripts.chat_ui
+  make_app:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self, autoload]
+    params:
+      returns: tornado.web.Application
+  map_search:
+    type: async
+    module: utu.tools.serper_toolkit
+    args: [self, query, hl, latitude, longitude, zoom, place_id, cid, num]
+    params:
+      returns: dict
+  maybe_basemodel_to_dict:
+    type: sync
+    module: utu.utils.openai_utils.openai_utils
+    args: [obj]
+  model_dump:
+    type: sync
+    module: utu.db.eval_datapoint
+    args: [self]
+  name:
+    type: sync
+    module: utu.agents.orchestrator_agent
+    args: [self]
+    params:
+      returns: str
+  news_search:
+    type: async
+    module: utu.tools.serper_toolkit
+    args: [self, query, location, gl, hl, num, date_range]
+    params:
+      returns: dict
+  on_agent_end:
+    type: async
+    module: utu.hooks.base_hooks
+    args: [self, context, agent, output]
+    params:
+      returns: None
+  on_agent_start:
+    type: async
+    module: utu.hooks.base_hooks
+    args: [self, context, agent]
+    params:
+      returns: None
+  on_close:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self]
+  on_handoff:
+    type: async
+    module: utu.hooks.base_hooks
+    args: [self, context, from_agent, to_agent]
+    params:
+      returns: None
+  on_invoke_tool:
+    type: async
+    module: utu.env.browser_tione_env
+    args: [ctx, input_json]
+    params:
+      returns: str
+  on_message:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, message]
+  on_span_end:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [self, span]
+    params:
+      returns: None
+  on_span_start:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [self, span]
+    params:
+      returns: None
+  on_tool_end:
+    type: async
+    module: utu.hooks.base_hooks
+    args: [self, context, agent, tool, result]
+    params:
+      returns: None
+  on_tool_start:
+    type: async
+    module: utu.hooks.base_hooks
+    args: [self, context, agent, tool]
+    params:
+      returns: None
+  on_trace_end:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [self, trace]
+    params:
+      returns: None
+  on_trace_start:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [self, trace]
+    params:
+      returns: None
+  oneline_object:
+    type: sync
+    module: utu.utils.log
+    args: [obj, limit]
+    params:
+      returns: str
+  open:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self]
+  options:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self]
+  parse:
+    type: async
+    module: utu.tools.documents.chunkr_parser
+    args: [self, path]
+    params:
+      returns: str
+  parse_document:
+    type: async
+    module: utu.tools.document_toolkit
+    args: [self, md5]
+    params:
+      returns: str
+  parse_skill_metadata:
+    type: sync
+    module: utu.env.shell_local_env
+    args: [skill_path]
+    params:
+      returns: dict
+  place_search:
+    type: async
+    module: utu.tools.serper_toolkit
+    args: [self, query, location, gl, hl, num, date_range]
+    params:
+      returns: dict
+  plan_check:
+    type: async
+    module: utu.agents.workforce.planner
+    args: [self, recorder, task]
+    params:
+      returns: None
+  plan_task:
+    type: async
+    module: utu.agents.workforce.planner
+    args: [self, recorder]
+    params:
+      returns: None
+  plan_update:
+    type: async
+    module: utu.agents.workforce.planner
+    args: [self, recorder, task]
+    params:
+      returns: str
+  post:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self]
+  postprocess:
+    type: sync
+    module: utu.meta.tool_generator_mcp
+    args: [self, task_recorder]
+    params:
+      returns: None
+  prepare:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self]
+  preprocess:
+    type: sync
+    module: utu.context.base_context_manager
+    args: [self, input, run_context]
+  print_bot:
+    type: sync
+    module: utu.utils.print_utils
+    args: [msg, color, add_prefix, prefix, end, flush]
+  print_error:
+    type: sync
+    module: utu.utils.print_utils
+    args: [msg, color, add_prefix, prefix, end, flush]
+  print_info:
+    type: sync
+    module: utu.utils.print_utils
+    args: [msg, color, add_prefix, prefix, end, flush]
+  print_input:
+    type: sync
+    module: utu.utils.print_utils
+    args: [prompt_text]
+  print_message:
+    type: sync
+    module: utu.utils.openai_utils.openai_utils
+    args: [message]
+    params:
+      returns: None
+  print_new_items:
+    type: sync
+    module: utu.utils.agents_utils
+    args: [new_items]
+    params:
+      returns: None
+  print_response:
+    type: sync
+    module: utu.utils.openai_utils.openai_utils
+    args: [response]
+    params:
+      returns: None
+  print_response_stream:
+    type: sync
+    module: utu.utils.openai_utils.openai_utils
+    args: [stream]
+    params:
+      returns: Response
+  print_stream:
+    type: async
+    module: utu.utils.openai_utils.openai_utils
+    args: [stream]
+    params:
+      returns: ChatCompletionMessage
+  print_stream_events:
+    type: async
+    module: utu.utils.agents_utils
+    args: [result]
+    params:
+      returns: None
+  print_tool:
+    type: sync
+    module: utu.utils.print_utils
+    args: [msg, color, add_prefix, prefix, end, flush]
+  process_chat_completion_params:
+    type: sync
+    module: utu.utils.openai_utils.simplified_client
+    args: [self, kwargs, default_config]
+    params:
+      returns: OpenAIChatCompletionParams
+  process_responses_params:
+    type: sync
+    module: utu.utils.openai_utils.simplified_client
+    args: [self, kwargs, default_config]
+    params:
+      returns: OpenAIResponsesParams
+  query:
+    type: sync
+    module: utu.db.db_service
+    args: [model_class, filters]
+    params:
+      returns: list[SQLModel]
+  query_one:
+    type: async
+    module: utu.utils.agents_utils
+    args: [self]
+    params:
+      returns: str
+  read_file:
+    type: async
+    module: utu.tools.local_env.file_edit
+    args: [self, path]
+    params:
+      returns: str
+  register_tool:
+    type: sync
+    module: utu.tools.utils
+    args: [name]
+  release_port:
+    type: sync
+    module: utu.env.utils.port_manager
+    args: [self, port]
+  report:
+    type: async
+    module: utu.agents.orchestra.reporter
+    args: [self, task_recorder]
+    params:
+      returns: AnalysisResult
+  require_db:
+    type: sync
+    module: utu.db.db_service
+    args: [safe]
+    params:
+      returns: Callable
+  reserve_port:
+    type: sync
+    module: utu.env.utils.port_manager
+    args: [self, port]
+    params:
+      returns: bool
+  responses_create:
+    type: async
+    module: utu.utils.openai_utils.simplified_client
+    args: [self]
+  run:
+    type: sync
+    module: utu.tools.local_env.bash_pexpect
+    args: [self, command]
+    params:
+      returns: str
+  run_bash:
+    type: async
+    module: utu.tools.bash_toolkit
+    args: [self, command]
+    params:
+      returns: str
+  run_code:
+    type: async
+    module: utu.tools.codesnip_toolkit
+    args: [self, code, language]
+    params:
+      returns: str
+  run_command:
+    type: sync
+    module: utu.tools.local_env.bash_pexpect
+    args: [child, custom_prompt, cmd]
+    params:
+      returns: str
+  run_debug:
+    type: async
+    module: utu.meta.tool_generator_mcp
+    args: [self, workspace_dir, task_recorder]
+    params:
+      returns: TaskRecorder
+  run_debug_streamed:
+    type: sync
+    module: utu.meta.tool_generator_mcp
+    args: [self, workspace_dir]
+    params:
+      returns: TaskRecorder
+  run_streamed:
+    type: sync
+    module: utu.agents.simple_agent
+    args: [self, input, trace_id, save, log_to_db]
+    params:
+      returns: TaskRecorder
+  save_event_list:
+    type: sync
+    module: utu.ui.dummy_chatbot
+  save_json:
+    type: sync
+    module: utu.utils.path
+    args: [file_path, data]
+    params:
+      returns: None
+  save_tools_info:
+    type: sync
+    module: scripts.utils.dump_tool_schemas
+    args: [tools]
+  schema_to_basemodel:
+    type: sync
+    module: utu.utils.common
+    args: [schema, class_name]
+    params:
+      returns: type[BaseModel]
+  scholar_search:
+    type: async
+    module: utu.tools.serper_toolkit
+    args: [self, query, location, gl, hl, num]
+    params:
+      returns: dict
+  search:
+    type: async
+    module: utu.tools.search_toolkit
+    args: [self, query, num_results]
+    params:
+      returns: dict
+  search_baidu:
+    type: async
+    module: utu.tools.search.baidu_search
+    args: [self, query]
+    params:
+      returns: dict
+  search_duckduckgo:
+    type: async
+    module: utu.tools.search.duckduckgo_search
+    args: [self, query]
+    params:
+      returns: list
+  search_google:
+    type: async
+    module: utu.tools.search.google_search
+    args: [self, query]
+    params:
+      returns: dict
+  search_jina:
+    type: async
+    module: utu.tools.search.jina_search
+    args: [self, query]
+    params:
+      returns: dict
+  search_papers:
+    type: async
+    module: utu.tools.arxiv_toolkit
+    args: [self, query, paper_ids, max_results]
+    params:
+      returns: list[dict]
+  search_wikipedia_revisions:
+    type: async
+    module: utu.tools.wikipedia_toolkit
+    args: [self, entity, year, month]
+    params:
+      returns: str
+  secure_repr:
+    type: sync
+    module: utu.config.base_config
+    args: [obj]
+    params:
+      returns: ReprArgs
+  send_event:
+    type: async
+    module: utu.ui.webui_agents
+    args: [self, event]
+  set_ask_function:
+    type: sync
+    module: utu.tools.user_interaction_toolkit
+    args: [self, ask_function]
+  set_attr:
+    type: sync
+    module: utu.agents.common
+    args: [self, key, value]
+  set_default_headers:
+    type: sync
+    module: utu.ui.webui_agents
+    args: [self]
+  set_final_output:
+    type: sync
+    module: utu.agents.common
+    args: [self, final_output]
+  set_instructions:
+    type: sync
+    module: utu.agents.simple_agent
+    args: [self, instructions]
+  setup_env:
+    type: sync
+    module: utu.tools.base
+    args: [self, env]
+    params:
+      returns: None
+  setup_logging:
+    type: sync
+    module: utu.utils.log
+    args: [level]
+    params:
+      returns: None
+  setup_workspace:
+    type: sync
+    module: utu.agents.simple_agent
+    args: [self, workspace_dir]
+  shutdown:
+    type: sync
+    module: utu.tracing.otel_agents_processor
+    args: [self]
+    params:
+      returns: None
+  simple_memory:
+    type: async
+    module: utu.tools.memory_toolkit
+    args: [self, action, content, old_string, new_string]
+    params:
+      returns: str
+  snake_to_camel:
+    type: sync
+    module: utu.utils.llm_output_parser
+    args: [name, pascal]
+    params:
+      returns: str
+  start_container:
+    type: async
+    module: utu.env.utils.docker_manager
+    args: [self, id]
+    params:
+      returns: dict
+  start_http_session:
+    type: async
+    module: utu.env.utils.mcp_client
+    args: [self, url]
+    params:
+      returns: AsyncGenerator
+  start_persistent_shell:
+    type: sync
+    module: utu.tools.local_env.bash_pexpect
+    args: [timeout]
+  start_sse_session:
+    type: async
+    module: utu.env.utils.mcp_client
+    args: [self, url]
+    params:
+      returns: AsyncGenerator
+  step1:
+    type: async
+    module: utu.meta.simple_agent_generator
+    args: [self, task_recorder, user_input]
+    params:
+      returns: None
+  step2:
+    type: async
+    module: utu.meta.simple_agent_generator
+    args: [self, task_recorder]
+    params:
+      returns: None
+  step3:
+    type: async
+    module: utu.meta.simple_agent_generator
+    args: [self, task_recorder]
+    params:
+      returns: None
+  step4:
+    type: async
+    module: utu.meta.simple_agent_generator
+    args: [self, task_recorder]
+    params:
+      returns: None
+  stop_all:
+    type: async
+    module: utu.env.utils.docker_manager
+    args: [self]
+    params:
+      returns: dict
+  stop_all_by_cid:
+    type: async
+    module: utu.env.utils.docker_manager
+    args: [self, container_ids]
+    params:
+      returns: dict
+  stop_container:
+    type: async
+    module: utu.env.utils.docker_manager
+    args: [self, id]
+    params:
+      returns: dict
+  stop_container_by_cid:
+    type: async
+    module: utu.env.utils.docker_manager
+    args: [self, cid]
+    params:
+      returns: dict
+  stream_events:
+    type: async
+    module: utu.agents.common
+    args: [self]
+    params:
+      returns: AsyncIterator[StreamEvent]
+  stream_response:
+    type: async
+    module: utu.models.react
+    args: [self, system_instructions, input, model_settings, tools, output_schema, handoffs, tracing, previous_response_id,
+      prompt]
+    params:
+      returns: AsyncIterator[TResponseStreamEvent]
+  to_dict:
+    type: sync
+    module: utu.agents.common
+    args: [self]
+  to_input_list:
+    type: sync
+    module: utu.agents.common
+    args: [self]
+    params:
+      returns: list[TResponseInputItem]
+  tool_chatcompletion_to_responses:
+    type: sync
+    module: utu.utils.openai_utils.openai_utils
+    args: [cls, tool]
+    params:
+      returns: FunctionToolParam
+  tools_map:
+    type: sync
+    module: utu.tools.base
+    args: [self]
+    params:
+      returns: dict
+  transcribe:
+    type: async
+    module: utu.tools.audio_toolkit
+    args: [self, md5]
+    params:
+      returns: dict
+  truncate_text:
+    type: sync
+    module: utu.utils.print_utils
+    args: [text, max_length, oneline]
+    params:
+      returns: str
+  truncate_text_by_token:
+    type: sync
+    module: utu.utils.token
+    args: [text, limit]
+    params:
+      returns: str
+  update:
+    type: sync
+    module: utu.db.db_service
+    args: [data]
+    params:
+      returns: bool
+  validate_enabled_skills:
+    type: sync
+    module: utu.config.agent_config
+    args: [self]
+  video_qa:
+    type: async
+    module: utu.tools.video_toolkit
+    args: [self, video_url, question]
+    params:
+      returns: str
+  video_search:
+    type: async
+    module: utu.tools.serper_toolkit
+    args: [self, query, location, gl, hl, num, date_range]
+    params:
+      returns: dict
+  web_qa:
+    type: async
+    module: utu.tools.search_toolkit
+    args: [self, url, query]
+    params:
+      returns: str
+  wikipedia_search:
+    type: async
+    module: utu.tools.wikipedia_toolkit
+    args: [self, query]
+    params:
+      returns: str
+  work_streamed:
+    type: sync
+    module: utu.agents.orchestra.worker
+    args: [self, task_recorder, subtask]
+    params:
+      returns: WorkerResult
+  wrapper:
+    type: sync
+    module: utu.db.db_service
+    params:
+      returns: Any
+  write_file:
+    type: async
+    module: utu.tools.local_env.file_edit
+    args: [self, path, file_text]
+    params:
+      returns: str
+
+variables:
+  key:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [find_dotenv(raise_error_if_not_found=False)]
+  SERPER_API_KEY:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [find_dotenv(raise_error_if_not_found=False)]
+  TENCENTCLOUD_RESOURCE_GROUP_ID:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [find_dotenv(raise_error_if_not_found=False)]
+  TENCENTCLOUD_SECRET_ID:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [find_dotenv(raise_error_if_not_found=False)]
+  TENCENTCLOUD_SECRET_KEY:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [find_dotenv(raise_error_if_not_found=False)]
+  UTU_LLM_API_KEY:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [find_dotenv(raise_error_if_not_found=False)]
+  UTU_LLM_BASE_URL:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [find_dotenv(raise_error_if_not_found=False)]
+  UTU_LLM_MODEL:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [find_dotenv(raise_error_if_not_found=False)]
+  UTU_LLM_TYPE:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [find_dotenv(raise_error_if_not_found=False)]
+
+files:
+  ./:
+    type: pattern
+    actions: [read]
+    params:
+      patterns: ['*']
+      caller: [execute_python_code_sync]
+  ./examples:
+    type: pattern
+    actions: [read]
+    params:
+      patterns: ['*.yaml']
+      caller: [_handle_list_agents_noexcept]
+  ./generated:
+    type: pattern
+    actions: [read]
+    params:
+      patterns: ['*.yaml']
+      caller: [_handle_list_agents_noexcept]
+  ./orchestra:
+    type: pattern
+    actions: [read]
+    params:
+      patterns: ['*.yaml']
+      caller: [_handle_list_agents_noexcept]
+  ./orchestrator:
+    type: pattern
+    actions: [read]
+    params:
+      patterns: ['*.yaml']
+      caller: [_handle_list_agents_noexcept]
+  ./simple:
+    type: pattern
+    actions: [read]
+    params:
+      patterns: ['*.yaml']
+      caller: [_handle_list_agents_noexcept]
+  .agent:
+    type: literal
+    actions: [read]
+    params:
+      caller: [_setup_skills, get_extra_sp]
+      path: [DIR_ROOT]
+  .cache:
+    type: literal
+    actions: [read]
+    params:
+      path: [DIR_ROOT]
+  .yaml:
+    type: literal
+    actions: [read]
+    params:
+      caller: [postprocess, format_config]
+      path: [self.output_dir]
+  agents/orchestra/reporter_sp.j2:
+    type: variable
+    actions: [read]
+    params:
+      caller: [pathlib.Path]
+  cache_dir:
+    type: variable
+    actions: [read]
+    params:
+      caller: [pathlib.Path]
+  cache_file:
+    type: variable
+    actions: [write, read]
+    params:
+      caller: [cache_file.parent.mkdir, open, json.load]
+  cache_path:
+    type: literal
+    actions: [read, write]
+    params:
+      caller: [pathlib.Path(cache_dir), cache_path.mkdir]
+  config_path:
+    type: variable
+    actions: [read]
+    params:
+      caller: [Path.resolve(), config_path.glob]
+  CONFIG_PATH:
+    type: variable
+    actions: [read]
+    params:
+      caller: [Path]
+  configs/agents/generated:
+    type: literal
+    actions: [read]
+    params:
+      caller: [__init__]
+      path: [DIR_ROOT]
+  configs/tools/generated:
+    type: literal
+    actions: [read]
+    params:
+      caller: [__init__, run_debug_streamed]
+      path: [DIR_ROOT]
+  DIR_CACHE:
+    type: variable
+    actions: [write]
+    params:
+      caller: [DIR_CACHE.mkdir]
+  DIR_LOGS:
+    type: variable
+    actions: [write]
+    params:
+      caller: [DIR_LOGS.mkdir]
+  examples_path:
+    type: variable
+    actions: [read]
+    params:
+      caller: [pathlib.Path, open, json.load]
+  file_path:
+    type: variable
+    actions: [read]
+    params:
+      caller: [os.path.exists, pathlib.Path, Path, shutil.copy2, open, yaml.safe_load, json.load]
+  filepath:
+    type: variable
+    actions: [read]
+    params:
+      caller: [Path.absolute(), Path]
+  image_name:
+    type: variable
+    actions: [write]
+    params:
+      caller: [open]
+      alias: [f]
+  image_path:
+    type: variable
+    actions: [read]
+    params:
+      caller: [pathlib.Path, open, Image.open]
+  img_path:
+    type: variable
+    actions: [read]
+    params:
+      caller: [pix.save]
+  index.html:
+    type: literal
+    actions: [read]
+    params:
+      caller: [resources.files.joinpath]
+  main.py:
+    type: literal
+    actions: [read]
+    params:
+      caller: [postprocess]
+      path: [odir]
+  manifest.json:
+    type: literal
+    actions: [read]
+    params:
+      caller: [postprocess]
+      path: [odir]
+  odir:
+    type: variable
+    actions: [write]
+    params:
+      caller: [odir.mkdir]
+  output_dir:
+    type: variable
+    actions: [write]
+    params:
+      caller: [output_dir.mkdir]
+  output_image.png:
+    type: variable
+    actions: [read, write]
+    params:
+      caller: [os.path.exists, open]
+  path:
+    type: variable
+    actions: [read]
+    params:
+      caller: [fitz.open, self.chunkr.upload, self.sandbox.files.read, self.sandbox.files.write]
+  path_obj:
+    type: literal
+    actions: [read]
+    params:
+      caller: [Path(file_path)]
+  planner_examples.json:
+    type: literal
+    actions: [read]
+    params:
+      caller: [_load_planner_examples]
+      path: [pathlib.Path.parent]
+  requirements.txt:
+    type: literal
+    actions: [read]
+    params:
+      caller: [postprocess]
+      path: [odir]
+  resolved_path:
+    type: variable
+    actions: [read, write]
+    params:
+      caller: [open]
+      alias: [f]
+  runner.py:
+    type: literal
+    actions: [read]
+    params:
+      caller: [postprocess]
+      path: [odir]
+  save_path:
+    type: variable
+    actions: [write]
+    params:
+      caller: [open]
+      alias: [f]
+  SKILL.md:
+    type: literal
+    actions: [read]
+    params:
+      caller: [parse_skill_metadata]
+      path: [skill_path]
+  template_path:
+    type: literal
+    actions: [read]
+    params:
+      caller: [pathlib.Path('agents/orchestra/reporter_sp.j2')]
+  urlparse.path:
+    type: variable
+    actions: [read]
+    params:
+      caller: [pathlib.Path]
+  utu.log:
+    type: literal
+    actions: [read]
+    params:
+      caller: [setup_logging]
+      path: [DIR_LOGS]
+  workdir:
+    type: variable
+    actions: [read]
+    params:
+      caller: [os.makedirs]
+  workspace_dir:
+    type: literal
+    actions: [read, write]
+    params:
+      caller: [pathlib.Path(workspace_root), workspace_dir.mkdir, pathlib.Path]
+
+processes:
+  /bin/bash:
+    type: shell
+    actions: [exec]
+    params:
+      caller: [pexpect.spawn]
+      shell: ["True"]
+  cmd.exe:
+    type: shell
+    actions: [exec]
+    params:
+      caller: [pexpect.spawn]
+      shell: ["True"]
+  which:
+    type: shell
+    actions: [exec]
+    args: [[openskills]]
+    params:
+      caller: [subprocess.run]
+      shell: ["False"]
+
+networks:
+  en.wikipedia.org:
+    type: api
+    actions: [GET]
+    urls: [/w/api.php]
+    protocols: [https]
+    ports: ["443"]
+    params:
+      caller: [search_wikipedia_revisions]
