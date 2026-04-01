@@ -87,7 +87,7 @@ class PlannerAgent:
         llm = LLMAgent(
             name="planner",
             instructions=sp,
-            model_config=self.config.workforce_planner_model,
+            model_config=self.config.planner_model,
         )
         up = FileUtils.get_jinja_template_str(self.prompts["PLANNER_UP"]).render(
             available_agents=self._format_available_agents(self.available_agents),
