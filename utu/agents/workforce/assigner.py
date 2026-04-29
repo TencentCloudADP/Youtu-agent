@@ -23,9 +23,11 @@ class AssignerAgent:
         self.config = config
         self.llm = LLMAgent(model_config=config.workforce_planner_model)
 
-    async def assign_task(self, recorder: WorkspaceTaskRecorder) -> Subtask:
+    async def assign_task(self, recorder: WorkspaceTaskRecorder) -> Subtask | None:
         """Assigns a task to a worker node with the best capability."""
         next_task = recorder.get_next_task()
+        if next_task is None:
+            return None
 
         sp = PROMPTS["TASK_ASSIGN_SYS_PROMPT"].format(
             overall_task=recorder.overall_task,

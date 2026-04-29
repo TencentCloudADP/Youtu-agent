@@ -69,8 +69,8 @@ class BaseBenchmark:
         processed_sample = processer.preprocess_one(sample)
         if processed_sample is None:
             return None
-        self.dataset.save(sample)
-        return sample
+        self.dataset.save(processed_sample)
+        return processed_sample
 
     async def rollout(self, max_retries: int = 3) -> None:
         """Rollout the datapoints."""
