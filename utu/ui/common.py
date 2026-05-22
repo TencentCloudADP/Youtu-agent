@@ -1,7 +1,7 @@
-from typing import Literal
+from typing import Any, Literal
 
 import agents as ag
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 from utu.agents.orchestra import OrchestraStreamEvent
 from utu.agents.orchestrator import OrchestratorStreamEvent
@@ -174,6 +174,15 @@ class UserAnswer(BaseModel):
 class UserRequest(BaseModel):
     type: Literal["query", "list_agents", "switch_agent", "answer", "gen_agent"]
     content: UserQuery | SwitchAgentRequest | UserAnswer | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_legacy_query(cls, data: Any) -> Any:
+        if isinstance(data, dict) and data.get("type") == "query" and data.get("content") is None:
+            query = data.get("query")
+            if query is not None:
+                data = {**data, "content": {"query": query}}
+        return data
 
 
 async def handle_raw_stream_events(event: ag.RawResponsesStreamEvent) -> Event | None:
