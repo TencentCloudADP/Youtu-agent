@@ -29,5 +29,5 @@ class TrajectoryModel(SQLModel, table=True):
             d_input=d_input,
             d_output=task_recorder.final_output,
             trajectories=json.dumps(task_recorder.trajectories, ensure_ascii=False),
-            time_cost=-1,
+            time_cost=task_recorder.time_cost,
         )

@@ -1,4 +1,5 @@
 import asyncio
+import time
 import traceback
 from collections.abc import AsyncIterator
 from dataclasses import asdict, dataclass, field
@@ -93,6 +94,8 @@ class TaskRecorder(DataClassWithStreamEvents):
     task: str = ""
     trace_id: str = ""
     input: str | list[TResponseInputItem] = field(default_factory=dict)
+    started_at: float = field(default_factory=time.perf_counter)
+    completed_at: float | None = None
 
     # from RunResultStreaming
     final_output: str = ""
@@ -104,10 +107,21 @@ class TaskRecorder(DataClassWithStreamEvents):
     # additional infos
     additional_infos: dict = field(default_factory=dict)
 
+    @property
+    def time_cost(self) -> float | None:
+        if self.completed_at is None:
+            return None
+        return self.completed_at - self.started_at
+
+    def mark_completed(self) -> None:
+        if self.completed_at is None:
+            self.completed_at = time.perf_counter()
+
     def to_input_list(self) -> list[TResponseInputItem]:
         return self.get_run_result().to_input_list()
 
     def add_run_result(self, run_result: RunResult, agent_name: str = None):
+        self.mark_completed()
         self.raw_run_results.append(run_result)
         self.trajectories.append(
             AgentsUtils.get_trajectory_from_agent_result(run_result, agent_name or run_result.last_agent.name)
