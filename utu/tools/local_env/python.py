@@ -13,14 +13,19 @@ import traceback
 from typing import TYPE_CHECKING
 
 try:
-    import matplotlib
-    import matplotlib.pyplot as plt
     from IPython.core.interactiveshell import InteractiveShell
     from traitlets.config.loader import Config
+except ImportError:
+    InteractiveShell = None
+    Config = None
+
+try:
+    import matplotlib
+    import matplotlib.pyplot as plt
 
     matplotlib.use("Agg")
 except ImportError:
-    pass
+    plt = None
 
 if TYPE_CHECKING:
     from IPython.core.history import HistoryManager
@@ -50,6 +55,9 @@ def create_ipython_shell():
     Returns:
         InteractiveShell: A configured IPython shell instance
     """
+    if InteractiveShell is None or Config is None:
+        raise ImportError("IPython is required for local python execution")
+
     InteractiveShell.clear_instance()
 
     config = Config()
@@ -112,6 +120,9 @@ def execute_python_code_sync(code: str, workdir: str, shell=None):
 
         # Create a new IPython shell instance or reuse existing one
         if shell is None:
+            if InteractiveShell is None or Config is None:
+                raise ImportError("IPython is required for local python execution")
+
             InteractiveShell.clear_instance()
 
             config = Config()
@@ -129,7 +140,7 @@ def execute_python_code_sync(code: str, workdir: str, shell=None):
         with contextlib.redirect_stdout(output), contextlib.redirect_stderr(error_output):
             shell.run_cell(code_clean)
 
-            if plt.get_fignums():
+            if plt is not None and plt.get_fignums():
                 img_buffer = io.BytesIO()
                 plt.savefig(img_buffer, format="png")
                 img_base64 = base64.b64encode(img_buffer.getvalue()).decode("utf-8")
