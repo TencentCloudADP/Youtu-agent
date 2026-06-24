@@ -92,7 +92,7 @@ class DataClassWithStreamEvents:
 class TaskRecorder(DataClassWithStreamEvents):
     task: str = ""
     trace_id: str = ""
-    input: str | list[TResponseInputItem] = field(default_factory=dict)
+    input: str | list[TResponseInputItem] = field(default_factory=list)
 
     # from RunResultStreaming
     final_output: str = ""
