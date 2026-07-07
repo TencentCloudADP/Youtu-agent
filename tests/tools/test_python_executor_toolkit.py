@@ -48,9 +48,13 @@ async def test_ipython():
     _code = "import numpy as np\na = np.array([1, 2, 3])\na"
     result = await toolkit.execute_python_code(code=_code)
     print(result)
+    assert result["success"]
+
     _code = "b = a + 1\nnp.sum(b)"
     result = await toolkit.execute_python_code(code=_code)
     print(result)
+    assert result["success"]
+    assert "9" in result["message"]
 
 
 async def test_ipython_e2b():

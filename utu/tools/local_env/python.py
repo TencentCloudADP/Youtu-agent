@@ -7,8 +7,12 @@ import base64
 import contextlib
 import glob
 import io
+import json
 import os
 import re
+import subprocess
+import sys
+import time
 import traceback
 from typing import TYPE_CHECKING
 
@@ -30,7 +34,6 @@ if TYPE_CHECKING:
         HistoryManager: HistoryManager
 
 
-# Used to clean ANSI escape sequences
 ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
 MAX_MEMORY_GB = 16
 CODE_HEADER = f"""
@@ -87,7 +90,7 @@ def cleanup_ipython_shell(shell):
 def execute_python_code_sync(code: str, workdir: str, shell=None):
     """
     Synchronous execution of Python code.
-    This function is intended to be run in a separate thread.
+    This function is intended to be run in a separate worker context.
 
     Args:
         code: Python code to execute
@@ -95,22 +98,18 @@ def execute_python_code_sync(code: str, workdir: str, shell=None):
         shell: Optional existing IPython shell instance to reuse
     """
     original_dir = os.getcwd()
-    shell_was_passed = shell is not None  # Track if shell was passed in
+    shell_was_passed = shell is not None
     try:
-        # Clean up code format
         code_clean = code.strip()
         if code_clean.startswith("```python"):
             code_clean = code_clean.split("```python")[1].split("```")[0].strip()
         code_clean = CODE_HEADER + code_clean
 
-        # Create and change to working directory
         os.makedirs(workdir, exist_ok=True)
         os.chdir(workdir)
 
-        # Get file list before execution
         files_before = set(glob.glob("*"))
 
-        # Create a new IPython shell instance or reuse existing one
         if shell is None:
             InteractiveShell.clear_instance()
 
@@ -144,18 +143,12 @@ def execute_python_code_sync(code: str, workdir: str, shell=None):
                 with open(image_name, "wb") as f:
                     f.write(base64.b64decode(img_base64))
 
-        stdout_result = output.getvalue()
-        stderr_result = error_output.getvalue()
-
-        stdout_result = ANSI_ESCAPE.sub("", stdout_result)
-        stderr_result = ANSI_ESCAPE.sub("", stderr_result)
+        stdout_result = ANSI_ESCAPE.sub("", output.getvalue())
+        stderr_result = ANSI_ESCAPE.sub("", error_output.getvalue())
 
         files_after = set(glob.glob("*"))
-        new_files = list(files_after - files_before)
-        new_files = [os.path.join(workdir, f) for f in new_files]
+        new_files = [os.path.join(workdir, f) for f in files_after - files_before]
 
-        # Don't clear the shell instance if it was passed in (reuse mode)
-        # Only clear if we created a new one
         if not shell_was_passed:
             try:
                 shell.atexit_operations = lambda: None
@@ -194,7 +187,167 @@ def execute_python_code_sync(code: str, workdir: str, shell=None):
         os.chdir(original_dir)
 
 
-async def execute_python_code_async(code: str, workdir: str, timeout: int = 30, shell=None) -> dict:
+def _timeout_result(timeout: float) -> dict:
+    return {
+        "success": False,
+        "stdout": "",
+        "stderr": "",
+        "status": False,
+        "output": "",
+        "files": [],
+        "error": f"Code execution timed out ({timeout} seconds)",
+    }
+
+
+def _worker_failure_result(error: str) -> dict:
+    return {
+        "success": False,
+        "stdout": "",
+        "stderr": "",
+        "status": False,
+        "output": "",
+        "files": [],
+        "error": error,
+    }
+
+
+class PythonExecutionSession:
+    """Persistent local Python session backed by a killable subprocess worker."""
+
+    def __init__(self):
+        self._process: subprocess.Popen[str] | None = None
+        self._next_request_id = 0
+
+    def _start_worker(self) -> None:
+        self._process = subprocess.Popen(
+            [sys.executable, "-m", "utu.tools.local_env.python_worker"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+        assert self._process.stdout is not None
+        assert self._process.stderr is not None
+        os.set_blocking(self._process.stdout.fileno(), False)
+        os.set_blocking(self._process.stderr.fileno(), False)
+
+    async def _stop_worker(self) -> None:
+        process = self._process
+        self._process = None
+        if process is None:
+            return
+
+        if process.stdin is not None and not process.stdin.closed:
+            try:
+                process.stdin.write(b'{"op": "close"}\n')
+                process.stdin.flush()
+            except (BrokenPipeError, ValueError):
+                pass
+            process.stdin.close()
+
+        async def wait_until_exit(timeout_seconds: float) -> bool:
+            deadline = time.monotonic() + timeout_seconds
+            while process.poll() is None and time.monotonic() < deadline:
+                await asyncio.sleep(0.01)
+            return process.poll() is not None
+
+        exited = await wait_until_exit(0.2)
+        if not exited:
+            process.terminate()
+            exited = await wait_until_exit(1)
+        if not exited:
+            process.kill()
+            await wait_until_exit(1)
+
+        if process.stdout is not None and not process.stdout.closed:
+            process.stdout.close()
+        if process.stderr is not None and not process.stderr.closed:
+            process.stderr.close()
+
+    async def _ensure_worker(self) -> None:
+        if self._process is None or self._process.poll() is not None:
+            await self._stop_worker()
+            self._start_worker()
+
+    async def restart(self) -> None:
+        await self._stop_worker()
+        self._start_worker()
+
+    async def close(self) -> None:
+        await self._stop_worker()
+
+    async def execute(self, code: str, workdir: str, timeout: float) -> dict:
+        await self._ensure_worker()
+        assert self._process is not None
+        assert self._process.stdin is not None
+        assert self._process.stdout is not None
+
+        request_id = self._next_request_id
+        self._next_request_id += 1
+        payload = json.dumps(
+            {
+                "op": "execute",
+                "request_id": request_id,
+                "code": code,
+                "workdir": str(workdir),
+            }
+        ).encode("utf-8")
+
+        try:
+            self._process.stdin.write(payload + b"\n")
+            self._process.stdin.flush()
+        except (BrokenPipeError, ValueError):
+            await self.restart()
+            return _worker_failure_result("Local python worker failed before it could accept the request")
+
+        deadline = time.monotonic() + timeout
+        response_buffer = bytearray()
+        while True:
+            if self._process.poll() is not None:
+                await self.restart()
+                return _worker_failure_result("Local python worker exited unexpectedly")
+
+            try:
+                chunk = os.read(self._process.stdout.fileno(), 4096)
+            except BlockingIOError:
+                chunk = b""
+
+            if chunk:
+                response_buffer.extend(chunk)
+                if b"\n" in response_buffer:
+                    response_line, _, _ = response_buffer.partition(b"\n")
+                    response = json.loads(response_line.decode("utf-8"))
+                    break
+
+            if time.monotonic() >= deadline:
+                await self.restart()
+                return _timeout_result(timeout)
+
+            await asyncio.sleep(0.01)
+        if response.get("request_id") != request_id:
+            await self.restart()
+            return _worker_failure_result("Local python worker returned a mismatched response")
+        return response.get("result", _worker_failure_result("Local python worker returned an empty response"))
+
+
+async def create_python_execution_session() -> PythonExecutionSession:
+    session = PythonExecutionSession()
+    await session._ensure_worker()
+    return session
+
+
+async def cleanup_python_execution_session(session: PythonExecutionSession | None) -> None:
+    if session is not None:
+        await session.close()
+
+
+async def execute_python_code_async(
+    code: str,
+    workdir: str,
+    timeout: float = 30,
+    shell=None,
+    session: PythonExecutionSession | None = None,
+) -> dict:
     """
     Asynchronous execution of Python code.
 
@@ -203,12 +356,19 @@ async def execute_python_code_async(code: str, workdir: str, timeout: int = 30, 
         workdir: Working directory for execution
         timeout: Execution timeout in seconds
         shell: Optional existing IPython shell instance to reuse
+        session: Optional persistent local python session backed by a subprocess worker
     """
+    if session is not None:
+        return await session.execute(code, workdir, timeout)
+
+    if isinstance(shell, PythonExecutionSession):
+        return await shell.execute(code, workdir, timeout)
+
     loop = asyncio.get_running_loop()
     try:
         return await asyncio.wait_for(
             loop.run_in_executor(
-                None,  # Use the default thread pool executor
+                None,
                 execute_python_code_sync,
                 code,
                 str(workdir),
@@ -217,12 +377,4 @@ async def execute_python_code_async(code: str, workdir: str, timeout: int = 30, 
             timeout=timeout,
         )
     except TimeoutError:
-        return {
-            "success": False,
-            "stdout": "",
-            "stderr": "",
-            "status": False,
-            "output": "",
-            "files": [],
-            "error": f"Code execution timed out ({timeout} seconds)",
-        }
+        return _timeout_result(timeout)
