@@ -6,7 +6,11 @@ from ..config import ToolkitConfig
 from ..env import ShellLocalEnv
 from ..utils import get_logger
 from .base import AsyncBaseToolkit, register_tool
-from .local_env.python import cleanup_ipython_shell, create_ipython_shell, execute_python_code_async
+from .local_env.python import (
+    cleanup_python_execution_session,
+    create_python_execution_session,
+    execute_python_code_async,
+)
 from .utils import E2BUtils
 
 logger = get_logger(__name__)
@@ -19,12 +23,10 @@ class PythonExecutorToolkit(AsyncBaseToolkit):
 
     def __init__(self, config: ToolkitConfig | dict | None = None):
         super().__init__(config)
-        self._ipython_shell = None  # Persistent IPython shell for local mode
+        self._python_session = None
 
         if self.env_mode == "local":
             self.setup_workspace()
-            # Create persistent IPython shell for variable sharing
-            self._ipython_shell = create_ipython_shell()
         elif self.env_mode == "e2b":
             pass
         else:
@@ -35,7 +37,6 @@ class PythonExecutorToolkit(AsyncBaseToolkit):
             logger.warning(f"PythonExecutorToolkit should not setup workspace in env_mode {self.env_mode}!")
             return
         if workspace_root is None:
-            # try to get workspace_root from env, or config
             if isinstance(self.env, ShellLocalEnv):
                 workspace_root = self.env.workspace
             elif "workspace_root" in self.config.config:
@@ -47,6 +48,11 @@ class PythonExecutorToolkit(AsyncBaseToolkit):
         workspace_dir = pathlib.Path(workspace_root)
         workspace_dir.mkdir(parents=True, exist_ok=True)
         self.workspace_root = str(workspace_root)
+
+    async def _get_python_session(self):
+        if self._python_session is None:
+            self._python_session = await create_python_execution_session()
+        return self._python_session
 
     @register_tool
     async def execute_python_code(self, code: str, timeout: int = 30) -> dict:
@@ -61,8 +67,12 @@ class PythonExecutorToolkit(AsyncBaseToolkit):
             dict: A dictionary containing the execution results.
         """
         if self.env_mode == "local":
+            session = await self._get_python_session()
             return await execute_python_code_async(
-                code, self.workspace_root, timeout=timeout, shell=self._ipython_shell
+                code,
+                self.workspace_root,
+                timeout=timeout,
+                session=session,
             )
         else:
             assert self.e2b_sandbox is not None, "E2B sandbox is not set up!"
@@ -70,8 +80,7 @@ class PythonExecutorToolkit(AsyncBaseToolkit):
             return E2BUtils.execution_to_str(result)
 
     async def cleanup(self):
-        """Clean up resources including persistent IPython shell."""
-        if self._ipython_shell is not None:
-            cleanup_ipython_shell(self._ipython_shell)
-            self._ipython_shell = None
+        """Clean up resources including the persistent local python session."""
+        await cleanup_python_execution_session(self._python_session)
+        self._python_session = None
         await super().cleanup()
