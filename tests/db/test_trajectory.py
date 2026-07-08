@@ -1,11 +1,21 @@
-# from utu.agents.common import TaskRecorder
-from utu.agents import SimpleAgent
-from utu.db import DBService, TrajectoryModel
+from types import SimpleNamespace
+
+from utu.db import TrajectoryModel
 
 
-async def test_traj_model():
-    """Test TrajectoryModel. The recorded trajectory should be saved to db and can be visualized."""
-    agent = SimpleAgent(config="simple/base")
-    task_recorder = await agent.run("hello")
-    trajectory = TrajectoryModel.from_task_recorder(task_recorder)
-    DBService.add(trajectory)
+def test_from_task_recorder_records_elapsed_time(monkeypatch):
+    monkeypatch.setattr("utu.db.trajectory_model.time.time", lambda: 15.0)
+    recorder = SimpleNamespace(
+        trace_id="trace-1",
+        task="hello",
+        input="",
+        final_output="done",
+        trajectories=[],
+        started_at=10.0,
+    )
+
+    trajectory = TrajectoryModel.from_task_recorder(recorder)
+
+    assert trajectory.time_cost == 5.0
+    assert trajectory.d_input == "hello"
+    assert trajectory.d_output == "done"
