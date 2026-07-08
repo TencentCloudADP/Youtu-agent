@@ -1,4 +1,5 @@
 import asyncio
+import time
 import traceback
 from collections.abc import AsyncIterator
 from dataclasses import asdict, dataclass, field
@@ -103,6 +104,7 @@ class TaskRecorder(DataClassWithStreamEvents):
 
     # additional infos
     additional_infos: dict = field(default_factory=dict)
+    started_at: float = field(default_factory=time.time)
 
     def to_input_list(self) -> list[TResponseInputItem]:
         return self.get_run_result().to_input_list()
