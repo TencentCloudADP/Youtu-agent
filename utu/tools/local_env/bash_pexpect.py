@@ -25,14 +25,21 @@ class PexpectBash:
         ]
 
     @staticmethod
+    def _spawn_windows_shell(timeout: int):
+        """Start cmd.exe through pexpect's cross-platform subprocess backend."""
+        from pexpect.popen_spawn import PopenSpawn
+
+        return PopenSpawn("cmd.exe /Q", encoding="utf-8", timeout=timeout)
+
+    @staticmethod
     def start_persistent_shell(timeout: int):
         # https://github.com/pexpect/pexpect/issues/321
 
         # Start a new Bash shell
         if sys.platform == "win32":
-            child = pexpect.spawn("cmd.exe", encoding="utf-8", echo=False, timeout=timeout)
+            child = PexpectBash._spawn_windows_shell(timeout)
             custom_prompt = "PROMPT_>"
-            child.sendline(f"prompt {custom_prompt}")
+            child.sendline("prompt PROMPT_$G")
             child.expect(custom_prompt)
         else:
             child = pexpect.spawn("/bin/bash", encoding="utf-8", echo=False, timeout=timeout)
@@ -45,7 +52,7 @@ class PexpectBash:
             child.sendline(f"PS1='{custom_prompt}'")
             # Force an initial read until the newly set prompt shows up
             child.expect(custom_prompt)
-            return child, custom_prompt
+        return child, custom_prompt
 
     @staticmethod
     def run_command(child, custom_prompt: str, cmd: str) -> str:
