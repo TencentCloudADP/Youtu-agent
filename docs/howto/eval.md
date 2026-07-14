@@ -274,6 +274,24 @@ python scripts/run_eval.py \
   --concurrency 5
 ```
 
+For GAIA, first accept the access conditions on the
+[official dataset page](https://huggingface.co/datasets/gaia-benchmark/GAIA), set `HF_TOKEN`, and then run:
+
+```bash
+# Download the current Parquet-backed dataset and import the validation split
+python scripts/data/process_gaia.py
+
+# Run evaluation on the full official validation split
+python scripts/run_eval.py \
+  --config_name gaia \
+  --exp_id my_gaia_run \
+  --dataset GAIA_validation \
+  --concurrency 5
+```
+
+The 72.8% result reported in the README uses the linked text-only validation subset. The command above imports the
+full official validation split, including rows with attachments.
+
 See the [Evaluation Documentation](https://tencentcloudadp.github.io/youtu-agent/eval) for more details on benchmarks.
 
 ### Configuring Judge Models
