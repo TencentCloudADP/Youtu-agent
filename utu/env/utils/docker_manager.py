@@ -1,7 +1,6 @@
 # ruff: noqa: I001
 import asyncio
 import logging
-import time
 from dataclasses import dataclass
 from enum import Enum
 
@@ -135,7 +134,7 @@ class DockerManager:
 
                 for _ in range(max_retries):
                     try:
-                        response = requests.get(ping_url, timeout=2)
+                        response = await asyncio.to_thread(requests.get, ping_url, timeout=2)
                         if response.status_code == 200:
                             service_ready = True
                             logger.info(f"容器 {id} 服务已就绪，/ping 返回 200")
@@ -144,7 +143,7 @@ class DockerManager:
                     except RequestException as e:
                         logger.debug(f"容器 {id} 服务未就绪，连接异常: {e}，重试中...")
 
-                    time.sleep(retry_interval)
+                    await asyncio.sleep(retry_interval)
 
                 if service_ready:
                     container_info.status = ContainerStatus.RUNNING
