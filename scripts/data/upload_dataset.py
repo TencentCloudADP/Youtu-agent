@@ -28,7 +28,7 @@ def convert_format_llamafactory(data: dict) -> DatasetSample:
     return DatasetSample(question=question_str, answer=answer_str)
 
 
-def upload_dataset(file_path: str, dataset_name: str, data_format: Literal["default", "llamafactory"] = "llamafactory"):
+def upload_dataset(file_path: str, dataset_name: str, data_format: Literal["default", "llamafactory"] = "default"):
     """
     Connects to the database and uploads datapoints from a local JSONL file.
     """
