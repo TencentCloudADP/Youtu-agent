@@ -61,10 +61,14 @@ const SafeMarkdown: React.FC<{ children: React.ReactNode, messageId: String }> =
     return content.replace(/```/g, '');
   };
 
-  // Convert children to string and decode Unicode escapes
+  // Convert children to string and decode Unicode escapes.
+  // Strip stylesheet payloads so agent-generated HTML cannot restyle the app shell
+  // (full HTML reports are isolated via iframe in MessageComponent).
   const content = useMemo(() => {
     const str = typeof children === 'string' ? children : String(children);
-    return decodeUnicodeEscapes(str);
+    return decodeUnicodeEscapes(str)
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<link\b[^>]*\brel\s*=\s*["']?stylesheet["']?[^>]*>/gi, '');
   }, [children]);
 
   useEffect(() => {
@@ -133,6 +137,17 @@ const SafeMarkdown: React.FC<{ children: React.ReactNode, messageId: String }> =
       h1: ({node, ...props}) => <h1 className="markdown-h1" {...props} />,
       h2: ({node, ...props}) => <h2 className="markdown-h2" {...props} />,
       h3: ({node, ...props}) => <h3 className="markdown-h3" {...props} />,
+      // Agent-generated HTML often includes <style>/<link rel="stylesheet">.
+      // With rehypeRaw these would inject into the app document and pollute the UI.
+      // Drop them here; full HTML reports are rendered in a sandboxed iframe instead.
+      style: () => null,
+      link: ({ rel, ...props }) => {
+        const relValue = typeof rel === 'string' ? rel.toLowerCase() : '';
+        if (relValue.split(/\s+/).includes('stylesheet')) {
+          return null;
+        }
+        return <link rel={rel} {...props} />;
+      },
     };
 
     // const DebouncedMermaid = memo(({ chart, mermaidId }: { chart: string, mermaidId: string }) => {

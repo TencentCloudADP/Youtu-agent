@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import SafeMarkdown from './SafeMarkdown';
 import type { Message, ToolCallMessage } from '../types/message';
 import type { PlanItem } from '../types/events';
@@ -227,7 +228,15 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
 
     if (contentType === "svg") {
       return (
-        <div className="report-svg" dangerouslySetInnerHTML={{ __html: processedContent }} />
+        <div
+          className="report-svg"
+          dangerouslySetInnerHTML={{
+            __html: DOMPurify.sanitize(processedContent, {
+              FORBID_TAGS: ['style', 'link', 'script'],
+              FORBID_ATTR: ['style'],
+            }),
+          }}
+        />
       );
     }
 
