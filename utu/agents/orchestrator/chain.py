@@ -82,6 +82,8 @@ class ChainPlanner:
         analysis = match.group(1).strip() if match else ""
 
         match = re.search(r"<plan>\s*\[(.*?)\]\s*</plan>", text, re.DOTALL)
+        if match is None:
+            raise ValueError("Failed to parse plan: <plan>[...]</plan> block not found in LLM output")
         plan_content = match.group(1).strip()
         tasks: list[Task] = []
         task_pattern = r'\{"name":\s*"([^"]+)",\s*"task":\s*"([^"]+)"\s*\}'
