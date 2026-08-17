@@ -37,9 +37,10 @@ class PhoenixUtils:
         return self.client.projects.get(project_name=self.project_name)
 
     def get_trace_url_by_id(self, trace_id: str) -> str | None:
-        # get trace by trace_id in @openai-agents, see the trick in OpenInferenceTracingProcessor
+        # Escape single quotes to prevent injection into the filter expression.
+        safe_trace_id = trace_id.replace("'", "''")
         spans_df = self.get_spans(
-            condition=f"metadata['trace_id'] == '{trace_id}'", select=["context.trace_id"], limit=1
+            condition=f"metadata['trace_id'] == '{safe_trace_id}'", select=["context.trace_id"], limit=1
         )
         if spans_df.empty:
             return None

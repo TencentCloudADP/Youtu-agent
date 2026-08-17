@@ -78,9 +78,9 @@ class WorkspaceTaskRecorder(TaskRecorder):
                 return True
         return False
 
-    def get_next_task(self) -> Subtask:
+    def get_next_task(self) -> Subtask | None:
         assert self.task_plan is not None, "No task plan available."
         for task in self.task_plan:
             if task.task_status == "not started":
                 return task
-        return "No uncompleted tasks."
+        return None

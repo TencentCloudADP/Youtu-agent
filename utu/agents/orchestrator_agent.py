@@ -106,7 +106,7 @@ class OrchestratorAgent:
         input = recorder.history_messages + [{"role": "user", "content": task_with_context}]
         # run the task
         recorder._event_queue.put_nowait(OrchestratorStreamEvent(name="task.start", item=task))
-        result = worker.run_streamed(input)
+        result = await worker.run_streamed(input)
         async for event in result.stream_events():
             recorder._event_queue.put_nowait(event)
         task.result = result.final_output  # set result

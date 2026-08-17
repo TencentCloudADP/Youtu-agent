@@ -34,6 +34,13 @@ class FileEditLocal:
         sanitized_filename = self._sanitize_filename(path_obj.name)
         path_obj = path_obj.parent / sanitized_filename
         resolved_path = path_obj.resolve()
+
+        # Security check: ensure the resolved path is within work_dir
+        try:
+            resolved_path.relative_to(self.work_dir)
+        except ValueError:
+            raise ValueError(f"Path {resolved_path} is outside the allowed workspace {self.work_dir}")
+
         self._create_backup(resolved_path)
         return resolved_path
 
