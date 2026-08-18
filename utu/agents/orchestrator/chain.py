@@ -82,7 +82,7 @@ class ChainPlanner:
         analysis = match.group(1).strip() if match else ""
 
         match = re.search(r"<plan>\s*\[(.*?)\]\s*</plan>", text, re.DOTALL)
-        plan_content = match.group(1).strip()
+        plan_content = match.group(1).strip() if match else ""
         tasks: list[Task] = []
         task_pattern = r'\{"name":\s*"([^"]+)",\s*"task":\s*"([^"]+)"\s*\}'
         task_matches = re.findall(task_pattern, plan_content, re.IGNORECASE)
