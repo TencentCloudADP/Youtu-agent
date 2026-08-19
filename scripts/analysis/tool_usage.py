@@ -1,5 +1,5 @@
 """
-- [ ] log the tool usage into a seperate table? (w/ toocalling id)
+- [ ] log the tool usage into a separate table? (w/ toocalling id)
 - [x] analysis, on the axis of exp -> this script
 """
 

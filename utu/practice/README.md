@@ -38,7 +38,7 @@ For built-in example workflows on math reasoning and web searching, please refer
 
 ### Step 0. Environment Setup
 
-Please refer to the [QuickStart](https://tencentcloudadp.github.io/youtu-agent/quickstart/) documentation for environment setup and installation of Youtu-Agent framework. If you are new to Python, please refer to [Begginer's QuickStart Guide](https://tencentcloudadp.github.io/youtu-agent/quickstart_beginner/) for detailed instructions. 
+Please refer to the [QuickStart](https://tencentcloudadp.github.io/youtu-agent/quickstart/) documentation for environment setup and installation of Youtu-Agent framework. If you are new to Python, please refer to [Beginner's QuickStart Guide](https://tencentcloudadp.github.io/youtu-agent/quickstart_beginner/) for detailed instructions. 
 
 Please install all dependencies by:
 ```bash
@@ -75,7 +75,7 @@ This example script will download and upload the following built-in datasets to 
 - AIME25: AIME 2025 competition problems  
 - DAPO-Math-17k: 17k math problems from DAPO dataset
 - AFM_web_RL: Web agent reinforcement learning dataset
-- WebWalkerQA: Web navigation n-answering dataset
+- WebWalkerQA: Web navigation and answering dataset
 
 **Important**: When uploading datasets, make sure that each `DatasetSample` includes the required fields: `dataset`, `source`, `question`, and `answer`, specifically, ensure to **set the `source` field as `"training_free_grpo"`** for proper data processing.
 
