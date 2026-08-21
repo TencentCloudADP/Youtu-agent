@@ -38,6 +38,7 @@ class ChainPlanner:
         need_plan = res.final_output.strip().endswith("<plan>")  # special token!
         if need_plan:
             return await self.create_plan(recorder)
+        recorder.final_output = res.final_output
 
     async def create_plan(self, recorder: Recorder) -> Plan:
         """Plan tasks based on the overall task and available agents."""
