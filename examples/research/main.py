@@ -4,9 +4,15 @@ import asyncio
 import pathlib
 
 from agents import custom_span, gen_trace_id, trace
-from pydantic import BaseModel
 from rich.console import Console
 
+from examples.research.plan_parser import (
+    ReportData,
+    WebSearchItem,
+    WebSearchPlan,
+    parse_report_data,
+    parse_search_plan,
+)
 from examples.research.printer import Printer
 from utu.agents import SimpleAgent
 from utu.config import ConfigLoader
@@ -14,30 +20,6 @@ from utu.tools import SearchToolkit
 from utu.utils import FileUtils
 
 PROMPTS = FileUtils.load_yaml(pathlib.Path(__file__).parent / "prompts.yaml")
-
-
-class WebSearchItem(BaseModel):
-    reason: str
-    "Your reasoning for why this search is important to the query."
-
-    query: str
-    "The search term to use for the web search."
-
-
-class WebSearchPlan(BaseModel):
-    searches: list[WebSearchItem]
-    """A list of web searches to perform to best answer the query."""
-
-
-class ReportData(BaseModel):
-    short_summary: str
-    """A short 2-3 sentence summary of the findings."""
-
-    markdown_report: str
-    """The final report"""
-
-    follow_up_questions: list[str]
-    """Suggested topics to research further"""
 
 
 class ResearchManager:
@@ -50,7 +32,6 @@ class ResearchManager:
             name="PlannerAgent",
             instructions=PROMPTS["PLANNER_PROMPT"],
             # model="gpt-4o",
-            output_type=WebSearchPlan,
         )
         toolkit = SearchToolkit(ConfigLoader.load_toolkit_config("search"))
         self.search_agent = SimpleAgent(
@@ -62,7 +43,6 @@ class ResearchManager:
             name="WriterAgent",
             instructions=PROMPTS["WRITER_PROMPT"],
             # model="o3-mini",
-            output_type=ReportData,
         )
 
     async def run(self, query: str) -> None:
@@ -101,12 +81,13 @@ class ResearchManager:
         result = await self.planner_agent.run(
             f"Query: {query}",
         )
+        search_plan = parse_search_plan(str(result.final_output))
         self.printer.update_item(
             "planning",
-            f"Will perform {len(result.get_run_result().final_output.searches)} searches",
+            f"Will perform {len(search_plan.searches)} searches",
             is_done=True,
         )
-        return result.get_run_result().final_output_as(WebSearchPlan)
+        return search_plan
 
     async def _perform_searches(self, search_plan: WebSearchPlan) -> list[str]:
         with custom_span("Search the web"):
@@ -141,7 +122,7 @@ class ResearchManager:
             input,
         )
         self.printer.mark_item_done("writing")
-        return result.get_run_result().final_output_as(ReportData)
+        return parse_report_data(str(result.final_output))
 
 
 async def main(query: str) -> None:
